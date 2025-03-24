@@ -1,0 +1,103 @@
+/* Đặt chiều rộng cho thanh cuộn */
+.custom-scroll ::-webkit-scrollbar {
+    width: 4px !important;
+    /* Đặt chiều rộng cho thanh cuộn dọc */
+}
+
+/* Đặt màu nền cho thanh cuộn */
+.custom-scroll ::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+    /* Màu nền của thanh cuộn */
+}
+
+/* Đặt màu và các thuộc tính khác cho thanh cuộn */
+.custom-scroll ::-webkit-scrollbar-thumb {
+    background-color: #c0c0c0;
+    /* Màu của thanh cuộn */
+    border-radius: 6px;
+    /* Đặt bo tròn cho thanh cuộn */
+}
+
+.form-input {
+    color: #7d7e81 !important;
+    border-color: hsl(0, 0%, 80%) !important;
+}
+
+.form-input:focus {
+    border-color: #2684ff !important;
+    box-shadow: 0 0 0 1px #2684ff !important;
+}
+
+.form-select-custom {
+    border-radius: 0.375rem;
+    --tw-border-opacity: 1;
+    border-color: rgb(224 230 237 / var(--tw-border-opacity));
+    --tw-bg-opacity: 1;
+    background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 600;
+    --tw-text-opacity: 1;
+    color: rgb(14 23 38 / var(--tw-text-opacity));
+    outline: 2px solid transparent !important;
+    outline-offset: 2px !important;
+    min-width: 200px !important;
+}
+
+.form-input::placeholder {
+    color: transparent;
+    /* Hoặc đặt màu bạn muốn */
+    /* Hoặc nếu bạn muốn giữ màu nhưng làm mờ đi */
+    opacity: 0.5;
+    /* 0 - 1, giá trị nhỏ hơn sẽ làm mờ */
+}
+
+.hover-image {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.3s ease, filter 0.3s ease;
+    /* Tạo hiệu ứng chuyển tiếp */
+}
+
+.hover-image:hover {
+    transform: scale(1.2);
+    /* Phóng to hình ảnh khi hover */
+    filter: brightness(1.2);
+    /* Tăng độ sáng của hình ảnh */
+}
+
+.blur-image {
+    width: 24px;
+    height: 24px;
+    opacity: 0.4;
+    /* Làm trong suốt 50% */
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.form-input:focus.reset-focus {
+    box-shadow: none !important;
+    border-color: transparent !important;
+}
+
+.collapse {
+    transition-property: height;
+    transition-duration: 200ms;
+    overflow: hidden;
+    /* background-color: transparent; */
+}
+
+.ant-picker-dropdown {
+    max-width: 100%;
+    overflow: auto;
+}
+.ant-picker-panel-container {
+    width: fit-content;
+}
+
+
+.icon-svg svg path {
+    stroke: red;
+    fill: #f30ee4;
+}
+

@@ -1,0 +1,263 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    html {
+        @apply scroll-smooth;
+    }
+
+    /* body {
+        @apply bg-[#fafafa] font-nunito;
+    } */
+
+    body.dark {
+        @apply bg-[#060818];
+    }
+
+    /* Panel */
+    .panel {
+        @apply rounded-lg bg-white p-5 shadow dark:bg-black;
+    }
+
+    /* Navbar */
+    .navbar-sticky header,
+    .navbar-floating header {
+        @apply sticky top-0 z-20;
+    }
+    .navbar-floating header {
+        @apply bg-[#fafafa]/90 px-6 pt-4 dark:bg-[#060818]/90;
+    }
+    .navbar-floating header > div > div:first-child {
+        @apply rounded-md;
+    }
+    .horizontal .navbar-floating header > div > div:first-child {
+        @apply rounded-b-none;
+    }
+    .horizontal .navbar-floating header .horizontal-menu {
+        @apply rounded-b-md;
+    }
+
+    /* Sidebar */
+    /* .sidebar:hover .nav-item > a {
+        @apply w-auto;
+    }
+
+    .sidebar .nav-item > button,
+    .sidebar .nav-item > a {
+        @apply mb-1 flex w-full items-center justify-between overflow-hidden whitespace-nowrap rounded-md p-2.5 text-[#506690] hover:bg-[#000]/[0.08] hover:text-black dark:hover:bg-[#181f32] dark:hover:text-white-dark;
+    }
+    .sidebar .nav-item > button.active,
+    .sidebar .nav-item > a.active {
+        @apply bg-[#000]/[0.08] text-black dark:bg-[#181f32] dark:text-white-dark;
+    } */
+
+    /* .sidebar .nav-item > button.active > div > span,
+    .sidebar .nav-item > a.active > div > span {
+        @apply dark:!text-white-dark;
+    }
+    .sidebar .nav-item a.active > div > span {
+        @apply text-orange-500;
+    }
+    .sidebar .nav-item button.active > div > .icon-svg {
+        @apply fill-orange-500  dark:fill-white-dark;
+    }
+
+    .sidebar .nav-item button.active > div > span {
+        @apply text-orange-500;
+    }
+    .sidebar .nav-item a.active > div > .icon-svg {
+        @apply fill-orange-500  dark:fill-white-dark;
+    } */
+/* 
+    .sidebar ul.sub-menu li button,
+    .sidebar ul.sub-menu li a {
+        @apply flex w-full items-center px-8 py-2.5  hover:bg-gray-100
+hover:text-orange-500 hover:before:!bg-orange-500 ltr:before:mr-2 rtl:before:ml-2 dark:before:bg-gray-500 dark:hover:bg-gray-900 dark:hover:text-orange-500;
+    }
+    .sidebar ul.sub-menu li button.active,
+    .sidebar ul.sub-menu li a.active {
+        @apply text-orange-500 before:bg-orange-500 bg-[#000]/[0.08] rounded;
+    }
+
+    .sidebar .nav-item a div:first-child svg,
+    .sidebar .nav-item button div:first-child svg {
+        @apply h-5 w-5 text-black/50 dark:text-white/50;
+    } */
+
+
+
+    .main-container .main-content {
+        @apply transition-all duration-300 lg:ltr:ml-[260px] lg:rtl:mr-[260px] bg-gray-100 dark:bg-[#000]/[0.08];
+    }
+
+    /* Horizontal layouts */
+    .horizontal .horizontal-menu {
+        @apply hidden shadow-md lg:flex;
+    }
+    .horizontal .horizontal-logo {
+        @apply flex;
+    }
+    .horizontal .main-container .main-content {
+        @apply ltr:ml-0 rtl:mr-0;
+    }
+    .horizontal .sidebar {
+        @apply ltr:-left-[260px] rtl:-right-[260px];
+    }
+    .horizontal.toggle-sidebar .sidebar {
+        @apply ltr:left-0 rtl:right-0 lg:ltr:-left-[260px] lg:rtl:-right-[260px];
+    }
+
+    .horizontal .nav-item a div:first-child svg,
+    .horizontal .nav-item button div:first-child svg {
+        @apply w-5 h-5 text-black/50 dark:text-white/50;
+    }
+
+    .horizontal .dark .nav-item button div:first-child svg,
+    .dark.horizontal .nav-item button div:first-child svg {
+        @apply text-white/50;
+    }
+
+    .horizontal-menu .nav-link {
+        @apply flex items-center py-2.5 px-2 rounded-lg hover:bg-[#000]/[0.08] hover:text-black dark:hover:bg-[#181f32] dark:hover:text-white-dark xl:px-4;
+    }
+
+    .horizontal-menu .nav-link.active {
+        @apply bg-[#000]/[0.08] text-black dark:bg-[#181f32] dark:text-white-dark;
+    }
+
+    .horizontal-menu ul.sub-menu {
+        @apply absolute top-full z-[10] hidden min-w-[180px] rounded bg-white p-0 py-2 text-dark shadow dark:bg-[#1b2e4b] dark:text-white-dark;
+    }
+
+    .horizontal-menu ul.sub-menu a,
+    .horizontal-menu ul.sub-menu button {
+        @apply flex items-center justify-between px-4 py-2 hover:bg-gray-100 hover:text-primary dark:hover:bg-primary/10 w-full;
+    }
+
+    .horizontal-menu ul.sub-menu a.active,
+    .horizontal-menu ul.sub-menu button.active {
+        @apply bg-gray-100 text-primary dark:bg-primary/10;
+    }
+
+    .horizontal-menu > li.nav-item:hover > ul.sub-menu,
+    .horizontal-menu > li.nav-item > ul.sub-menu > li:hover > ul {
+        @apply block;
+    }
+
+    /* Vertical layouts */
+    .vertical.toggle-sidebar .horizontal-logo,
+    .vertical.toggle-sidebar .collapse-icon {
+        @apply flex;
+    }
+    .vertical.toggle-sidebar .main-container .main-content {
+        @apply ltr:ml-0 rtl:mr-0;
+    }
+    .vertical .sidebar {
+        @apply ltr:-left-[260px] rtl:-right-[260px] lg:ltr:left-0 lg:rtl:right-0;
+    }
+    .vertical.toggle-sidebar .sidebar {
+        @apply ltr:left-0 rtl:right-0 lg:ltr:-left-[260px] lg:rtl:-right-[260px];
+    }
+
+    /* Collapsible vertical layouts */
+    .collapsible-vertical .sidebar {
+        @apply hover:w-[260px] ltr:-left-[260px] rtl:-right-[260px] lg:w-[70px] lg:ltr:left-0 lg:rtl:right-0;
+    }
+    .collapsible-vertical.toggle-sidebar .sidebar {
+        @apply ltr:left-0 rtl:right-0;
+    }
+    .collapsible-vertical.toggle-sidebar .sidebar {
+        @apply lg:w-[260px];
+    }
+    .collapsible-vertical.toggle-sidebar .sidebar .nav-item > a {
+        @apply w-auto;
+    }
+    .collapsible-vertical.toggle-sidebar .main-content {
+        @apply lg:w-[calc(100%-260px)] lg:ltr:ml-[260px] lg:rtl:mr-[260px];
+    }
+
+    .collapsible-vertical .sidebar .sub-menu {
+        @apply lg:hidden;
+    }
+    .collapsible-vertical .sidebar:hover .sub-menu,
+    .collapsible-vertical .sidebar:hover .sub-menu.recent-submenu,
+    .collapsible-vertical.toggle-sidebar .sidebar .sub-menu {
+        @apply block;
+    }
+    .collapsible-vertical .main-content {
+        @apply lg:w-[calc(100%-70px)] lg:ltr:ml-[70px] lg:rtl:mr-[70px];
+    }
+    .collapsible-vertical .sidebar .collapse-icon,
+    .collapsible-vertical .main-logo > span {
+        @apply transition-opacity duration-300 lg:opacity-0;
+    }
+    .collapsible-vertical .sidebar:hover .collapse-icon,
+    .collapsible-vertical.toggle-sidebar .collapse-icon,
+    .collapsible-vertical .sidebar:hover .main-logo > span,
+    .collapsible-vertical.toggle-sidebar .main-logo > span {
+        @apply duration-500 lg:opacity-100;
+    }
+    .collapsible-vertical.toggle-sidebar .sidebar .collapse-icon {
+        @apply flex rotate-0;
+    }
+    .collapsible-vertical .sidebar:hover .collapse-icon {
+        @apply flex rotate-180;
+    }
+    .collapsible-vertical .sidebar ul > h2 span {
+        @apply hidden whitespace-nowrap;
+    }
+    .collapsible-vertical .sidebar ul > h2 svg {
+        @apply block;
+    }
+    .collapsible-vertical .sidebar:hover ul > h2 span,
+    .collapsible-vertical.toggle-sidebar .sidebar ul > h2 span {
+        @apply inline;
+    }
+    .collapsible-vertical .sidebar:hover ul > h2 svg,
+    .collapsible-vertical.toggle-sidebar .sidebar ul > h2 svg {
+        @apply hidden;
+    }
+
+    /* dropdown */
+    .dropdown {
+        @apply relative;
+    }
+    .dropdown > button {
+        @apply flex;
+    }
+    .dropdown ul {
+        @apply my-1 min-w-[120px] rounded bg-white p-0 py-2 shadow dark:bg-[#1b2e4b] text-black dark:text-white-dark;
+    }
+    .dropdown ul li > a,
+    .dropdown ul li > button {
+        @apply flex items-center px-4 py-2 hover:bg-primary/10 hover:text-primary;
+    }
+    .dropdown ul li > button {
+        @apply w-full;
+    }
+
+    /* Form */
+    .form-input,
+    .form-textarea,
+    .form-select,
+    .form-multiselect {
+        @apply w-full rounded-md border border-white-light bg-white;
+        @apply px-4 py-2 text-sm font-normal text-black !outline-none focus:border-primary focus:ring-transparent;
+        @apply focus:border-primary focus:ring-transparent;
+        @apply dark:border-[#17263c] dark:bg-[#121e32] dark:text-white-dark dark:focus:border-primary disabled:bg-[#eee];
+    }
+
+
+
+  
+}
+
+.table-row-light {
+    background-color: #ffffff;
+}
+.table-row-dark {
+    background-color: #fbfbfb;
+}
+
+
