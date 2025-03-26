@@ -19,7 +19,8 @@ const { RangePicker } = DatePicker;
 export interface HotelManagmentListProps {
     data: Hotel[]
     loading: boolean,
-    search_key?: string
+    key_search?: string,
+    is_active?:STATUS
     onPageChange?: ((page: number) => void)
     onEdit?: ((arg0: Hotel) => void)
     onResetPWD?: ((arg0: Hotel) => void)
@@ -32,32 +33,48 @@ export interface HotelManagmentListProps {
 const HotelManagment = () => {
 
     const [dialog, setDialog] = useState<PopupInterface>({ open: false, content: undefined, title: "" });
-    const [data, setData] = useState<Hotel[]>([
-        new Hotel({ id: 1 }),
-        new Hotel({ id: 2 }),
-        new Hotel({ id: 3 }),
-        new Hotel({ id: 4 }),
-    ])
-    const [fullData, setFullData] = useState<Hotel[]>([])
-
 
     const tabs = [
-        { id: 1, label: "tất cả" },
-        { id: 2, label: "Đang hoạt động (30)" },
-        { id: 3, label: "Ngừng hoạt động (30)" },
+        { id: STATUS.ALL, label: "tất cả" },
+        { id: STATUS.ACTIVE, label: "Đang hoạt động (30)"},
+        { id: STATUS.INACTIVE, label: "Ngừng hoạt động (30)"},
+    ]
 
-    ];
+    const [parameter, setParameter] = useState<HotelManagmentListProps>({
+        data: [],
+        loading: false,
+        is_active: STATUS.ALL,
+        key_search: "",
+    });
 
-    const getRoomtType = () => {
 
+
+
+    const getHotelList = (param:HotelManagmentListProps) => {
+        hotelService.list(param).then((res) => {
+
+            if (res.status == 200) {
+                setParameter({...parameter,data:res.data})
+            } else {
+                message.error(res.message)
+            }
+        })
     }
 
-    const deleteRoomtType = (data: Hotel) => {
+    const changeStatus = (data: Hotel) => {
+        hotelService.changeStatus(data.id).then((res) => {
 
+            if (res.status == 200) {
+                getHotelList(parameter)
+            } else {
+                message.error(res.message)
+            }
+
+        })
     }
 
     useEffect(() => {
-        getRoomtType()
+        getHotelList(parameter)
     }, []);
 
 
@@ -65,7 +82,7 @@ const HotelManagment = () => {
         let component = data.id == 0 ?
             (
                 <CreateForm data={data} onComplete={() => {
-                    setDialog({ ...dialog, open: false,width:undefined })
+                    setDialog({ ...dialog, open: false, width: undefined })
                 }} />
             )
             :
@@ -74,10 +91,10 @@ const HotelManagment = () => {
                     setDialog({ ...dialog, open: false })
                 }} />
             )
-        let width = data.id == 0 ? 750 :undefined
+        let width = data.id == 0 ? 750 : undefined
         let title = data.id == 0 ? "Tạo khách sạn" : "Chỉnh sửa khách sạn"
 
-        setDialog({ ...dialog, open:true, width:width, content:component, title:title })
+        setDialog({ ...dialog, open: true, width: width, content: component, title: title })
     }
 
 
@@ -91,49 +108,68 @@ const HotelManagment = () => {
     const showResetPWDModal = (data: Hotel) => {
         let component = <ResetPWD data={data} onComplete={() => {
             setDialog({ ...dialog, open: false })
-        }}/>
+        }} />
         setDialog({ ...dialog, open: true, content: component, title: "Đặt lại mật khẩu" })
     }
 
-    const showModalConfirm = (type:number,data: Hotel) => {
-        
+    const showModalConfirm = (type: number, data: Hotel) => {
+
         let content = <></>
 
-        switch (type){
+        switch (type) {
 
             case 1:// 1 = popup confirmation of active and inactive hotel
-                if (data.active) {
+
+
+                if (data.is_active == STATUS.ACTIVE) {
+
                     content = <DialogContent
                         icon={<p className="p-3 bg-red-100 w-fit rounded-full text-center"><IconPause /></p>}
                         title="Tạm ngưng khách sạn?"
                         content={<p>Bạn có chắc chắn muốn tạm ngưng khách sạn <b>{data.name}</b> này không?</p>}
-                        btnConfirm={<Button color="danger" variant="solid">Xác nhận</Button>}
+                        btnConfirm={
+                            <Button color="danger" variant="solid" onClick={() => {
+                                changeStatus(data)
+                                setDialog({ ...dialog, open: false })
+                            }}>
+                                Xác nhận
+                            </Button>
+                        }
                     />
-                }else{
+                } else {
                     content = <DialogContent
                         icon={<p className="p-3 bg-red-100 w-fit rounded-full text-center"><IconPause /></p>}
                         title="Bật hoạt động khách sạn"
                         content={<p>Bạn có chắc chắn muốn bật hoạt động khách sạn <b>{data.name}</b> này không?</p>}
-                        btnConfirm={<Button color="blue" variant="solid">Xác nhận</Button>}
-                  
+                        btnConfirm={
+                            <Button color="blue" variant="solid" onClick={() => {
+                                changeStatus(data)
+                                setDialog({ ...dialog, open: false })
+                            }}>
+                                Xác nhận
+                            </Button>
+                        }
+
                     />
                 }
 
-               
+
                 break
 
             case 2:// 2 = popup confirmation of reset password
                 content = <DialogContent
-                    icon={<p className="p-3 bg-blue-100 w-fit rounded-full text-center"><IconUnlock fill={true}/></p>}
+                    icon={<p className="p-3 bg-blue-100 w-fit rounded-full text-center"><IconUnlock fill={true} /></p>}
                     title="Đặt lại mật khẩu"
                     content={<p>Bạn có chắc chắn muốn đặt lại mật khẩu cho khách sạn <b>{data.name}</b> này không?</p>}
                     btnConfirm={
                         <Button color="blue" variant="solid" onClick={() => {
-                            setDialog({ ...dialog, open: false})
+                            setDialog({ ...dialog, open: false })
                             showResetPWDModal(data)
-                        }}>Xác nhận</Button>
+                        }}>
+                            Xác nhận
+                        </Button>
                     }
-                  
+
                 />
                 break
 
@@ -143,24 +179,11 @@ const HotelManagment = () => {
     }
 
 
-    const onSearch = (key: string) => {
-        let keySearch = key.toLowerCase();
-        const filteredData = fullData.filter((item) => item.active);
 
-        const data = keySearch
-            ? filteredData.filter((item) => {
-                let name = item.name.toLowerCase();
-                if (!removeVietnameseFromString(keySearch)) {
-                    name = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                    keySearch = keySearch.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                }
-                return name.includes(keySearch);
-            })
-            : filteredData;
+    const onChangeStatus = (status: number) => {
 
-
-        setData(data);
-
+        // setParameter({...parameter,is_active:status}) 
+   
     };
 
 
@@ -175,19 +198,21 @@ const HotelManagment = () => {
                         className="w-64"
                         prefix={<i className="fa-solid fa-magnifying-glass" />}
                         allowClear
-                        onChange={(e) => onSearch(e.target.value)}
+                        onChange={(e) => {
+      
+                            setParameter({...parameter,key_search:e.target.value}) 
+                        }}
                     />
                     <div className="flex justify-end gap-3">
-                       
+
                         <Select
                             defaultValue={1}
-                            
                             // optionFilterProp="label"
                             className="w-[150px]"
                             onChange={(value: number) => { console.log(value) }}
                             options={reportFilter}
                         />
-                        <RangePicker/>
+                        <RangePicker />
 
                         <Button type="primary" onClick={() => showModalCreate(new Hotel())}>+ Tạo khách sạn</Button>
 
@@ -195,9 +220,7 @@ const HotelManagment = () => {
 
                 </div>
 
-                <TabBar tabs={tabs} onChange={(value) => {
-
-                }} />
+                <TabBar currentTab={parameter.is_active ?? STATUS.ALL} tabs={tabs} onChange={(value) => onChangeStatus(value)} />
             </div>
         )
     };
@@ -209,11 +232,11 @@ const HotelManagment = () => {
             <Header />
 
             <HotelManagementTable
-                data={data}
+                data={parameter.data}
                 loading={false}
                 onEdit={(value) => showModalCreate(value)}
-                onResetPWD={(value) => showModalConfirm(2,value)} //2 = popup confirmation of reset password
-                onChangeStatus={(value) => showModalConfirm(1,value)} // 1 = popup confirmation of active and inactive hotel
+                onResetPWD={(value) => showModalConfirm(2, value)} //2 = popup confirmation of reset password
+                onChangeStatus={(value) => showModalConfirm(1, value)} // 1 = popup confirmation of active and inactive hotel
                 onShowDetail={(value) => showDetailModal(value)}
             />
 

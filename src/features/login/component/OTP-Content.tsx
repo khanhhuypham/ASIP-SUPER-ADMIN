@@ -30,7 +30,7 @@ export const OPTContent = ({data}:{data:_2FA_Auth}) => {
         setOtp(newOtp);
 
         // Move to next input if a digit is entered
-        if (value && index < length - 1) {
+        if (value && index < otp.length - 1) {
             inputsRef.current[index + 1]?.focus();
         }
     };

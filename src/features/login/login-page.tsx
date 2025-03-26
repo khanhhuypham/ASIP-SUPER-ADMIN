@@ -169,7 +169,7 @@ export const LoginPage = () => {
                     </div>
 
                 </div>
-                <div className=" py-[100px] h-full flex justify-center items-center bg-gray-50">
+                <div className="flex-1 py-[100px] h-full flex justify-center items-center bg-gray-50">
                     <img
                         className="w-[60%] object-contain max-h-full"
                         src={imgLogin}
