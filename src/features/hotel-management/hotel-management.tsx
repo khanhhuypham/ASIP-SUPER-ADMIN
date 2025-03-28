@@ -6,7 +6,6 @@ import { tab_filter_id } from "../../constants/tag-id"
 import { DialogContent } from "../../components/custom/dialog-content"
 import IconPause from "../../components/icons/icon-pause"
 import { HotelDetail } from "./component/hotel-info/hotel-detail"
-import { removeVietnameseFromString } from "../../utils/helpers"
 import { CreateForm } from "./component/create/create-form"
 import { HotelManagementTable } from "./component/table/hotel-management-table"
 import { ResetPWD } from "./component/reset-password"
@@ -14,6 +13,7 @@ import { EditHotel } from "./component/edit-hotel"
 import { TabBar } from "../../components/custom/tab-bar"
 import { reportFilter } from "../../constants/constant"
 import IconUnlock from "../../components/icons/icon-unclock"
+import { STATUS } from "../../constants/enum"
 
 const { RangePicker } = DatePicker;
 export interface HotelManagmentListProps {
@@ -51,26 +51,26 @@ const HotelManagment = () => {
 
 
     const getHotelList = (param:HotelManagmentListProps) => {
-        hotelService.list(param).then((res) => {
+        // hotelService.list(param).then((res) => {
 
-            if (res.status == 200) {
-                setParameter({...parameter,data:res.data})
-            } else {
-                message.error(res.message)
-            }
-        })
+        //     if (res.status == 200) {
+        //         setParameter({...parameter,data:res.data})
+        //     } else {
+        //         message.error(res.message)
+        //     }
+        // })
     }
 
     const changeStatus = (data: Hotel) => {
-        hotelService.changeStatus(data.id).then((res) => {
+        // hotelService.changeStatus(data.id).then((res) => {
 
-            if (res.status == 200) {
-                getHotelList(parameter)
-            } else {
-                message.error(res.message)
-            }
+        //     if (res.status == 200) {
+        //         getHotelList(parameter)
+        //     } else {
+        //         message.error(res.message)
+        //     }
 
-        })
+        // })
     }
 
     useEffect(() => {

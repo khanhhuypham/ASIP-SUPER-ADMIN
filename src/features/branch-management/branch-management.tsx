@@ -125,9 +125,9 @@ const BranchManagment = () => {
 
                 </div>
 
-                <TabBar tabs={tabs} onChange={(value) => {
+                {/* <TabBar tabs={tabs} onChange={(value) => {
 
-                }} />
+                }} /> */}
             </div>
         )
     };

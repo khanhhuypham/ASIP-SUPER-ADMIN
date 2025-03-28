@@ -1,56 +1,42 @@
 import { useState, useRef, useEffect } from "react";
 
-interface Tab {
-    id:number,
-    label:string
+export interface Tab {
+    id: number;
+    label: string;
+    count?: number
 }
 
-export const TabBar = ({tabs,onChange}:{tabs:Tab[],onChange?:((ag0:number) => void)}) => {
-    const [tab, setTab] = useState<number>(1);
-    const [underlineStyle, setUnderlineStyle] = useState({ width: 0, left: 0 });
-    const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+export const TabBar = ({
+    currentTab,
+    tabs,
+    onChange = () => { }, // Default to a no-op function
+}: {
+    currentTab: number;
+    tabs: Tab[];
+    onChange?: (id: number) => void;
+}) => {
 
+    
 
     useEffect(() => {
-        const activeTab = tabRefs.current[tab - 1];
-       
+  
 
-        if (activeTab) {
-            setUnderlineStyle({
-                width: activeTab.offsetWidth,
-                left: activeTab.offsetLeft,
-            });
-        }
-
-        onChange && onChange(tab)
-    }, [tab]);
-
- 
+    }, [currentTab]); // Add `tabs` to the dependency array
 
     return (
-        <div className="relative flex border-b border-gray-200 h-[40px]">
-            {tabs.map(({ id, label }, index) => (
-                <button
-                    key={id}
-                    ref={(el) => {tabRefs.current[index] = el}}
-                    className={`relative px-4 pb-1 text-sm font-medium transition-colors duration-300 ${
-                        tab === id ? "text-black" : "text-gray-400"
-                    }`}
-                    onClick={() => setTab(id)}
-                    role="tab"
-                    aria-selected={tab === id}
-                >
-                    {label}
-                </button>
-            ))}
-
-            <div
-                className="absolute bottom-0 h-[2px] bg-black transition-all duration-300 ease-in-out"
-                style={{
-                    width: `${underlineStyle.width}px`,
-                    left: `${underlineStyle.left}px`,
-                }}
-            />
+        <div className="tabs">
+            <ul className="tab-list">
+                {tabs.map((tab) => (
+                    <li
+                        key={tab.id}
+                        className={`tab-item ${tab.id === currentTab ? "active" : ""}`}
+                        onClick={() => onChange(tab.id)}
+                    >
+                        {tab.label} {tab.count && `(${tab.count})`}
+                    </li>
+                ))}
+            </ul>
         </div>
+
     );
 };

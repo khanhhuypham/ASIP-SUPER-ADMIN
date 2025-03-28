@@ -1,4 +1,4 @@
-export const reportFilter: {value:number,label:string}[] = [
+export const reportFilter: { value: number; label: string }[] = [
     { value: 1, label: "Hôm nay" },
     { value: 2, label: "Hôm qua" },
     { value: 3, label: "Tuần này" },
@@ -9,7 +9,19 @@ export const reportFilter: {value:number,label:string}[] = [
     { value: 8, label: "Năm trước" },
     { value: 9, label: "3 Năm gần nhất" },
     { value: 10, label: "Tất cả" },
-];
-
-
-
+  ];
+  
+  
+  
+  export const DATE_FORMAT = {
+    DDMMYYY_HHmm: "dd/MM/yyyy HH:mm",
+    DDMMYYY: "dd/MM/yyyy"
+  };
+  
+  
+  export const Antd_DATE_FORMAT = {
+    DDMMYYY_HHmm: "DD/MM/YYYY HH:mm",
+    DDMMYYY: "DD/MM/YYYY"
+  };
+  
+  

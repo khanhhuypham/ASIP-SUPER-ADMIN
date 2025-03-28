@@ -13,12 +13,12 @@ import { _2FA_Auth } from "../../../model/user/_2FAAuth";
 
 
 
-export const OPTContent = ({data}:{data:_2FA_Auth}) => {
+export const OPTContent = ({ data }: { data: _2FA_Auth }) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
     const [_2FASecret, set_2FASecret] = useState<_2FA_Auth>(new _2FA_Auth());
-    const [otp, setOtp] = useState<string[]>(["","","","","",""]);
+    const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
     const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
     const handleChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,20 +29,22 @@ export const OPTContent = ({data}:{data:_2FA_Auth}) => {
         newOtp[index] = value;
         setOtp(newOtp);
 
-        // Move to next input if a digit is entered
-        if (value && index < otp.length - 1) {
-            inputsRef.current[index + 1]?.focus();
+
+        // If a digit was entered (value is not empty) AND it's not the last input field
+        if (value && index < otp.length - 1) { // Use otp.length instead of undefined 'length'
+            // Find the next input field in the ref array and focus it
+            inputsRef.current[index + 1]?.focus(); // Use optional chaining just in case
         }
+
     };
 
-    const verifyOTP = (secret: string, OTP: string) => {
+    const verifyOTP = (username: string, OTP: string) => {
 
-        authService.verifyOTP(secret, OTP).then((res) => {
+        authService.VerifyOtp(username, OTP).then((res) => {
 
-            if (res.status == 201) {
-                
-                dispatch(setUser(new User({access_token: res.data.access_token})))
-                navigate(ROUTE_LINK.DASHBOARD)
+            if (res.status == 200) {
+                dispatch(setUser(new User({ access_token: res.data.access_token })))
+                navigate(ROUTE_LINK.HOTEL_MANAGEMENT)
             } else {
                 message.error(res.message)
             }
@@ -55,25 +57,16 @@ export const OPTContent = ({data}:{data:_2FA_Auth}) => {
     };
 
 
-    const handleKeyDown = (index: number, event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === "Backspace" && !otp[index] && index > 0) {
-            inputsRef.current[index - 1]?.focus();
-        }
 
-        if (event.key === "ArrowLeft" && index > 0) {
-            inputsRef.current[index - 1]?.focus();
-        }
 
-        if (event.key === "ArrowRight" && index < length - 1) {
-            inputsRef.current[index + 1]?.focus();
-        }
-    };
-
-    useEffect(()=>{
+    useEffect(() => {
         set_2FASecret(data)
-    },[data])
+        setOtp(["", "", "", "", "", ""])
+        inputsRef.current = inputsRef.current.slice(0, otp.length);
+        
+    }, [data])
 
-    
+
 
     return (
 
@@ -85,7 +78,11 @@ export const OPTContent = ({data}:{data:_2FA_Auth}) => {
             </div>
 
             <div className="flex justify-center w-full">
-                <QRCode value={_2FASecret.QR_Code}  errorLevel="H" size={250} />
+                {/* <QRCode value={_2FASecret.qr_code}  errorLevel="H" size={250} /> */}
+                <div className="border bg-white rounded-lg">
+                    <img src={_2FASecret.QR_Code} width={250} height={250} className="object-contain rounded-lg"/>
+                </div>
+
             </div>
 
             <div className="flex justify-center gap-3">
@@ -97,7 +94,6 @@ export const OPTContent = ({data}:{data:_2FA_Auth}) => {
                         value={value}
                         maxLength={1}
                         onChange={(event) => handleChange(index, event)}
-                        onKeyDown={(event) => handleKeyDown(index, event)}
                         style={{
                             width: "40px",
                             height: "40px",
@@ -116,7 +112,7 @@ export const OPTContent = ({data}:{data:_2FA_Auth}) => {
                 loading={loading ? { icon: <SyncOutlined spin /> } : false}
                 disabled={otp.some(digit => digit.length === 0)}
                 iconPosition="end"
-                onClick={() => {verifyOTP(_2FASecret.secret,otp.join(""))}}
+                onClick={() => { verifyOTP(_2FASecret.username, otp.join("")) }}
             >
                 <span className="font-bold text-base">Xác minh</span>
 

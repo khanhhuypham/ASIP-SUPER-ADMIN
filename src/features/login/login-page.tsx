@@ -45,19 +45,18 @@ export const LoginPage = () => {
         }),
         onSubmit: (values) => {
 
-            login(values.username, values.password)
+            signIn(values.username, values.password)
 
         },
     });
 
 
-    const login = (email: string, password: string) => {
+    const signIn = (username: string, password: string) => {
 
-        authService.Login(email, password).then((res) => {
+        authService.SignIn(username, password).then((res) => {
 
             if (res.status == 201) {
-           
-                showQRCode(res.data)
+                showQRCode({...res.data,username:username})
             } else {
                 message.error(res.message)
             }
@@ -69,11 +68,12 @@ export const LoginPage = () => {
 
     };
 
+
+
     const showQRCode = (data: _2FA_Auth) => {
         let component = <OPTContent data={data} />
         setDialog({ ...dialog, open: true, content: component, title: "Chi tiết khách sạn" })
     }
-
 
 
     useEffect(() => {
@@ -81,12 +81,9 @@ export const LoginPage = () => {
     }, [])
 
 
-
     return (
 
         <>
-
-
             <div className="h-screen flex">
                 <div className=" w-[600px] h-full py-10 bg-white">
 

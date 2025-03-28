@@ -1,4 +1,11 @@
 
+export enum STATUS {
+    ALL = -1,
+    ACTIVE = 1,
+    INACTIVE = 0,
+}
+
+
 
 export enum MEDIA_TYPE {
     IMAGE = 1,

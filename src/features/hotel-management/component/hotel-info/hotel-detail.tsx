@@ -33,9 +33,9 @@ export const HotelDetail = ({ data }: { data: Hotel }) => {
         <div className="space-y-4">
 
 
-            <TabBar tabs={tabs} onChange={(value) => {
+            {/* <TabBar tabs={tabs} onChange={(value) => {
                 setTab(value)
-            }} />
+            }} /> */}
 
             <>
               

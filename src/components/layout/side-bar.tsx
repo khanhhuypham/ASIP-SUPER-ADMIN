@@ -187,7 +187,7 @@ const Sidebar = () => {
 
                         {icon}
 
-                        <span className={`text-[${item.select ? activeColor : inActiveColor}]`}>
+                        <span style={{ color: item.select ? activeColor : inActiveColor }}>
                             {item.label}
                         </span>
 
