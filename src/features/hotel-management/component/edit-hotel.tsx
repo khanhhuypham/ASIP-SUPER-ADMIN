@@ -5,12 +5,14 @@ import { useEffect, useState } from "react";
 import { Hotel } from "../../../model/hotel/hotel";
 import { emailRegex, phoneRegExp } from "../../../constants/regex";
 import { ExternalLabelTextField } from "../../../components/custom/field/external-label-textfield";
+import { hotelService } from "../../../service/hotel-service/hotel-service";
+import { message } from "antd";
 
 
 
 export const EditHotel = (
-        { data, onComplete,onRollBack }: 
-        { data: Hotel, onComplete?: (() => void),onRollBack?: (() => void)}
+    { data, onComplete, onRollBack }:
+        { data: Hotel, onComplete?: (() => void), onRollBack?: (() => void) }
 ) => {
     const [files, setFiles] = useState<FileList | undefined>()
 
@@ -34,8 +36,7 @@ export const EditHotel = (
 
         }),
         onSubmit: (values) => {
-            onComplete && onComplete()
-
+            update(values)
         },
     });
 
@@ -45,6 +46,19 @@ export const EditHotel = (
         // Combine the prefix with the random number
         return `KH00${randomNumber}`;
     };
+
+
+    const update = (data: Hotel) => {
+        hotelService.update(data).then((res) => {
+            if (res.status == 200) {
+                onComplete && onComplete()
+                message.success("Cập nhật thành công");
+            } else {
+                message.error(res.message);
+            }
+        })
+    }
+
 
 
     useEffect(() => {
@@ -63,19 +77,34 @@ export const EditHotel = (
 
     return (
         <div className="space-y-6 ">
-        
+
             <form className='flex gap-5' onSubmit={formik.handleSubmit}>
 
                 <div className='space-y-2 flex-1'>
 
                     <ExternalLabelTextField
-                        label="Chủ khách sạn"
+                        label="Mã khách sạn"
+                        name="code"
+                        value={formik.values.code}
+                        disabled={true}
+                    />
+
+                    <ExternalLabelTextField
+                        label="Tên khách sạn"
                         name="name"
-                        placeholder="Nhập thông tin"
                         value={formik.values.name}
-                        error={formik.errors.name}
+                        disabled={true}
+                    />
+
+
+                    <ExternalLabelTextField
+                        label="Chủ khách sạn"
+                        name="owner_name"
+                        placeholder="Nhập thông tin"
+                        value={formik.values.owner_name}
+                        error={formik.errors.owner_name}
                         onChange={(value) => {
-                            formik.setFieldValue("name", value)
+                            formik.setFieldValue("owner_name", value)
                         }}
                         required
                     />
@@ -106,7 +135,7 @@ export const EditHotel = (
 
 
                     <div className='flex justify-end gap-2'>
-                   
+
                         <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg" >
                             Hoàn tất
                         </button>

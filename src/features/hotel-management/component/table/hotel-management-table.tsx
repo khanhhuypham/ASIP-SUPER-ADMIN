@@ -19,11 +19,11 @@ import IconPlayCircle from "../../../../components/icons/icon-play-circle";
 
 export const HotelManagementTable = ({
     data,
-    // page,
-    // limit,
-    // total_record,
     loading,
-    // onPageChange,
+    page,
+    total_record,
+    onPageChange,
+
     onEdit,
     onResetPWD,
     onChangeStatus,
@@ -65,8 +65,6 @@ export const HotelManagementTable = ({
         handleResize();
         // window.addEventListener("resize", handleResize);
         // return () => window.removeEventListener("resize", handleResize);
-
-
     }, []);
 
     const columns: ColumnsType<Hotel> = [
@@ -80,35 +78,59 @@ export const HotelManagementTable = ({
         {
             title: 'Mã khách sạn',
             dataIndex: 'code',
+            sorter: (a: Hotel, b: Hotel) => {
+                if (!a.code || !b.code) return 0;
+                return a.code.localeCompare(b.code, "vi");
+            },
         },
         {
             title: 'Tên khách sạn',
             dataIndex: 'name',
+            sorter: (a: Hotel, b: Hotel) => {
+                if (!a.name || !b.name) return 0;
+                return a.name.localeCompare(b.name, "vi");
+            },
         },
         {
             title: 'SL chi nhánh',
-            dataIndex: '',
-            // render: (_, data, index) => <span>{data.room.length}</span>,
+            dataIndex: 'branch',
+            width: 120,
+            render: (_, data, index) => <span>{data.branches.length}</span>,
         },
         {
             title: 'Ngày tạo',
             dataIndex: 'created_at',
+            width: 150,
+            sorter: (a: Hotel, b: Hotel) => {
+                if (!a.created_at || !b.created_at) return 0;
+                const dateA = new Date(a.created_at.replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$2/$1/$3"));
+                const dateB = new Date(b.created_at.replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$2/$1/$3"));
+                return dateA.getTime() - dateB.getTime();
+            },
         },
         {
             title: 'Ngày cập nhật',
             dataIndex: 'updated_at',
+            width: 150,
+            sorter: (a: Hotel, b: Hotel) => {
+                if (!a.updated_at || !b.updated_at) return 0;
+                const dateA = new Date(a.updated_at.replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$2/$1/$3"));
+                const dateB = new Date(b.updated_at.replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$2/$1/$3"));
+                return dateA.getTime() - dateB.getTime();
+            },
         },
         {
             title: 'Trạng thái',
-            dataIndex: '',
-            key: '',
+            dataIndex: 'is_active',
+
             render: (_, data) => {
                 if (data.active) {
                     return <Tag color="green">Đang kinh doanh</Tag>;
                 } else {
-                    return <Tag color="gray">Ngừng kinh doanh</Tag>;
+                    return <Tag color="red">Ngừng kinh doanh</Tag>;
                 }
             },
+            width: 60
         },
         {
             dataIndex: '',
@@ -118,22 +140,22 @@ export const HotelManagementTable = ({
                 const items: MenuProps['items'] = [
                     {
                         label: data.active ? "Tạm ngưng" : "Bật hoạt động",
-                        icon: data.active ? <IconPauseCircle  className="w-5 h-5"/> : <IconPlayCircle  className="w-5 h-5"/>,
+                        icon: data.active ? <IconPauseCircle className="w-5 h-5" /> : <IconPlayCircle className="w-5 h-5" />,
                         key: '0',
                     },
                     {
                         label: "Đặt lại mật khẩu",
-                        icon: <IconUnlock fill={false} className="w-5 h-5"/>,
+                        icon: <IconUnlock fill={false} className="w-5 h-5" />,
                         key: '1',
                     },
                     {
                         label: "Chỉnh sửa",
-                        icon: <IconPencil  className="w-5 h-5"/>,
+                        icon: <IconPencil className="w-5 h-5" />,
                         key: '2',
                     },
                     {
                         label: "Xem chi tiết",
-                        icon: <IconEye className="w-5 h-5"/>,
+                        icon: <IconEye className="w-5 h-5" />,
                         key: '3',
                     },
                 ];
@@ -165,24 +187,29 @@ export const HotelManagementTable = ({
         },
     ];
 
-
+    const showTotal: PaginationProps['showTotal'] = (total) => `Total ${total} items`;
     return (
         <div ref={tableRef}>
             <Table<Hotel>
                 columns={columns}
                 rowKey={(record) => record.id}
                 dataSource={data}
-                // pagination={true}
+                pagination={false}
                 loading={loading}
-                // footer={() => <Pagination align="end" current={page} pageSize={10} onChange={onPageChange} total={total_record} showTotal={showTotal} />}
+                footer={() => <Pagination align="end" current={page} pageSize={10} onChange={onPageChange} total={total_record}  showTotal={showTotal}/>}
                 tableLayout="auto"
                 scroll={{
                     x: 1500,
                     y: tableMaxHeight - 100 // minus footer height
+                }}
+                rowSelection={{
+                    type: "checkbox",
+                    onChange: (selectedRowKeys, selectedRows) => {
+                        console.log(selectedRowKeys, selectedRows);
+                    },
                 }}
             />
 
         </div>
     );
 };
-

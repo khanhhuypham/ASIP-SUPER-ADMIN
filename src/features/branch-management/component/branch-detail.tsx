@@ -1,4 +1,4 @@
-import { Avatar } from "antd";
+import { Avatar, Tag } from "antd";
 
 
 import iconApple from "../../../assets/images/icon-apple.png"
@@ -6,21 +6,23 @@ import { Branch } from "../../../model/branch/branch";
 
 export const BranchInfor = ({ data }: { data: Branch }) => {
 
+    const Status = () => {
+        if (data.active ) {
+            return <Tag color="green">Đang kinh doanh</Tag>;
+        } else {
+            return <Tag color="red">Ngừng kinh doanh</Tag>;
+        }
+    }
     return (
         <div className="rounded-lg border max-w-lg mx-auto my-5 p-5">
 
             <div className="flex items-center justify-between mb-5">
 
                 <div>
-                    {/* <Avatar size={40} src={process.env.REACT_APP_IMAGE_URL + data.avatar.url} /> */}
                     <Avatar size={40} src={iconApple} />
                     <div className="font-bold text-base text-gray-800">{data.name}</div>
                 </div>
-                <button
-                    className="bg-green-100 text-green-800 border-none rounded-md px-3 py-2 ml-auto text-xs cursor-default"
-                >
-                    {/* {customerData.status} */} Đang hoạt động
-                </button>
+                <Status/>
             </div>
 
             {/* Details Section */}

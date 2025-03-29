@@ -32,8 +32,7 @@ export const userSlice = createSlice({
     reducers: {
         setUser(state, { payload }) {
             state.user = payload;
-
-      
+            console.log("user: ",payload)
             Cookies.set(COOKIE_KEYS.USER,JSON.stringify(payload),{ expires: 24 * 60 * 60 });
         },
 

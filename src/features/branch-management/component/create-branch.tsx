@@ -2,10 +2,15 @@ import { useFormik } from "formik";
 
 import * as Yup from "yup";
 import { useEffect, useState } from "react";
-import { ExternalLabelTextField } from "../../../../components/custom/field/external-label-textfield";
-import { emailRegex, phoneRegExp } from "../../../../constants/regex";
-import { ExternalLabelTextArea } from "../../../../components/custom/field/external-label-textarea";
-import { Branch } from "../../../../model/branch/branch";
+import { message } from "antd";
+import { Branch } from "../../../model/branch/branch";
+import { Hotel } from "../../../model/hotel/hotel";
+import { emailRegex, phoneRegExp } from "../../../constants/regex";
+import { hotelService } from "../../../service/hotel-service/hotel-service";
+import ExternalLabelSelectField from "../../../components/custom/field/external-label-select-field";
+import { ExternalLabelTextField } from "../../../components/custom/field/external-label-textfield";
+import { ExternalLabelTextArea } from "../../../components/custom/field/external-label-textarea";
+import { branchService } from "../../../service/branch-service/branch-service";
 
 
 
@@ -19,10 +24,14 @@ export const CreateBranch = ({
     onRollBack?: () => void;
 }) => {
 
+    const [hotelList,setHotelList] = useState<Hotel[]>([])
 
     const formik = useFormik({
         initialValues: new Branch(),
         validationSchema: Yup.object({
+
+
+
             name: Yup.string()
                 .min(2, "Độ dài tối thiểu 2 ký tự")
                 .max(50, "Độ dài tối đa 50 ký tự")
@@ -34,42 +43,89 @@ export const CreateBranch = ({
 
             email: Yup.string().matches(emailRegex, "Email không hợp lệ").nullable(),
 
-            address: Yup.string()  
+            address: Yup.string()
                 .min(2, "Độ dài tối thiểu 2 ký tự")
                 .required("Địa chỉ không được bỏ trống"),
         }),
         onSubmit: (values) => {
-            onComplete &&
-                onComplete({
-                    ...values,
-                    id: 1,
-                    isActive: true,
-                    formattedCreatedAt: "",
-                    formattedUpdatedAt: "",
-                });
+            
+            if (data.id == 0) {
+                create(values)
+            } else {
+                update(values)
+            }
         },
     });
 
-    const generateRandomCode = (): string => {
-        // Generate a random 3-digit number between 100 and 999
-        const randomNumber = Math.floor(Math.random() * 900) + 100;
-        // Combine the prefix with the random number
-        return `KH00${randomNumber}`;
-    };
+
+    const getHotelList = () => {
+        hotelService.list({page:1,limit:500}).then((res) => {
+            if (res.status == 200) {
+                setHotelList(res.data.list)
+            } else {
+                message.error(res.message)
+            }
+        })
+    }
+
+    const create = (data:Branch) => {
+        branchService.create(data).then((res) => {
+            if (res.status == 201) {
+                onComplete && onComplete(data);
+            } else {
+                message.error(res.message)
+            }
+        })
+    }
+
+    const update = (data:Branch) => {
+        branchService.update(data).then((res) => {
+            if (res.status == 200) {
+                onComplete && onComplete(data);
+            } else {
+                message.error(res.message)
+            }
+        })
+    }
+
+  
 
     useEffect(() => {
         if (data.id == 0) {
             formik.resetForm();
-
         } else {
             formik.setValues(data);
         }
+
+        getHotelList()
     }, [data]);
 
     return (
         <div className="">
             <form className="flex gap-5" onSubmit={formik.handleSubmit}>
                 <div className="space-y-6 flex-1">
+
+
+                    <ExternalLabelSelectField
+                        label="Khách sạn"
+                        name="hotel"
+                        selectedOptions={[formik.values.hotel.id]}
+                        options={hotelList.map((hotel) => ({value:hotel.id,label:hotel.name}))}
+                        showSearch={true}
+                        required
+                        placeholder="Vui lòng chọn khách sạn"
+                        onChange={(value) => {
+
+                            const hotel = hotelList.find((h) => h.id == value)
+
+                            if (hotel){
+                                formik.setFieldValue("hotel", value);
+                            }
+
+                        }}
+                    />
+
+
                     <ExternalLabelTextField
                         label="Tên chi nhánh"
                         name="name"
@@ -143,3 +199,5 @@ export const CreateBranch = ({
         </div>
     );
 };
+
+

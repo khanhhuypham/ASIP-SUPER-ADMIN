@@ -17,20 +17,15 @@ import IconPlayCircle from "../../../components/icons/icon-play-circle";
 
 export const BranchManagementTable = ({
     data,
-    // page,
-    // limit,
-    // total_record,
     loading,
-    // onPageChange,
     onEdit,
-    onResetPWD,
     onChangeStatus,
     onShowDetail
 }: BranchManagmentListProps) => {
     const [tableMaxHeight, setTableMaxHeight] = useState(0);
     const tableRef = useRef<HTMLDivElement>(null);
 
-   
+
 
 
     useEffect(() => {
@@ -71,63 +66,90 @@ export const BranchManagementTable = ({
 
     const columns: ColumnsType<Branch> = [
         {
-            title: 'STT',
-            dataIndex: '',
-            key: '',
-            render: (record, _, index) => index + 1,
-            width: 60
+            title: "STT",
+            width: 70,
+            align: "center",
+            render: (_, __, index) => index + 1,
         },
+
 
         {
             title: 'Tên chi nhánh',
             dataIndex: 'name',
+            key: 'name',
+            sorter: (a: Branch, b: Branch) => {
+                if (!a.name || !b.name) return 0;
+                return a.name.localeCompare(b.name, "vi");
+            },
+
         },
         {
-            title: 'Địa chỉ',
-            dataIndex: 'address',
-            // render: (_, data, index) => <span>{data.room.length}</span>,
+            title: "Địa chỉ",
+            dataIndex: "address",
+            key: "address",
+            ellipsis: true,
+            width: "30%",
         },
 
         {
             title: 'Tên khách sạn',
-            dataIndex: '',
-            render: (_, data, index) => <span>ov123</span>,
+            dataIndex: 'hotel',
+            key: "hotel",
+            render: (_, data, index) => <span>{data.hotel.name}</span>,
         },
         {
             title: 'Ngày tạo',
             dataIndex: 'created_at',
+            key: 'created_at',
+            sorter: (a: Branch, b: Branch) => {
+                if (!a.created_at || !b.created_at) return 0;
+                const dateA = new Date(
+                    a.created_at.replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$2/$1/$3")
+                );
+                const dateB = new Date(
+                    b.created_at.replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$2/$1/$3")
+                );
+                return dateA.getTime() - dateB.getTime();
+            },
+
         },
 
         {
             title: 'Trạng thái',
-            dataIndex: '',
-            key: '',
+            dataIndex: 'active',
+            key: 'active',
+            // sorter: (a: Branch, b: Branch) => {
+            //     if (typeof a.active !== "number" || typeof b.is_active !== "number")
+            //         return 0;
+            //     return b.is_active - a.is_active; // Đang hoạt động (1) sẽ lên trên
+            // },
+
             render: (_, data) => {
                 if (data.active) {
                     return <Tag color="green">Đang kinh doanh</Tag>;
                 } else {
-                    return <Tag color="gray">Ngừng kinh doanh</Tag>;
+                    return <Tag color="red">Ngừng kinh doanh</Tag>;
                 }
             },
         },
         {
             dataIndex: '',
-            key: '',
+            key: 'action',
             render: (i, data) => {
                 const items: MenuProps['items'] = [
                     {
                         label: data.active ? "Tạm ngưng" : "Bật hoạt động",
-                        icon: data.active ? <IconPauseCircle className="w-5 h-5"/> : <IconPlayCircle className="w-5 h-5" />,
+                        icon: data.active ? <IconPauseCircle className="w-5 h-5" /> : <IconPlayCircle className="w-5 h-5" />,
                         key: '0',
                     },
                     {
                         label: "Chỉnh sửa",
-                        icon: <IconPencil className="w-5 h-5"/>,
+                        icon: <IconPencil className="w-5 h-5" />,
                         key: '1',
                     },
                     {
                         label: "Xem chi tiết",
-                        icon: <IconEye className="w-5 h-5"/>,
+                        icon: <IconEye className="w-5 h-5" />,
                         key: '2',
                     },
                 ];

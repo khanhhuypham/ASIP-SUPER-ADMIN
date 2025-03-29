@@ -79,13 +79,25 @@ const HotelManagment = () => {
         hotelService.list(param).then((res) => {
 
             if (res.status == 200) {
-
+                console.log(res.data)
                 setParameter({
                     ...parameter,
                     data: res.data.list,
                     total_record: res.data.total_record
                 })
-                getCountTab(param)
+
+                setTabs((prev) => prev.map((tab) => {
+                    switch (tab.id) {
+                        case STATUS.ALL:
+                            return { ...tab, count: res.data.statistic.total }
+                        case STATUS.ACTIVE:
+                            return { ...tab, count: res.data.statistic.total_active }
+                        case STATUS.INACTIVE:
+                            return { ...tab, count: res.data.statistic.total_inactive }
+                        default:
+                            return tab
+                    }
+                }))
 
 
             } else {
@@ -94,24 +106,7 @@ const HotelManagment = () => {
         })
     }
 
-    const getCountTab = (param: HotelManagmentListProps) => {
-        hotelService.countTab(param).then((res) => {
-            if (res.status == 200) {
-                setTabs((prev) => prev.map((tab) => {
-                    switch (tab.id) {
-                        case STATUS.ALL:
-                            return { ...tab, count: res.data.total_record }
-                        case STATUS.ACTIVE:
-                            return { ...tab, count: res.data.total_active }
-                        case STATUS.INACTIVE:
-                            return { ...tab, count: res.data.total_inactive }
-                        default:
-                            return tab
-                    }
-                }))
-            }
-        })
-    }
+
 
     const changeStatus = (data: Hotel) => {
         hotelService.changeStatus(data.id).then((res) => {
@@ -191,9 +186,9 @@ const HotelManagment = () => {
                             </Button >
                         }
                         btnCancel={
-                            < Button variant="outlined" 
+                            < Button variant="outlined"
                                 onClick={() => setDialog({ ...dialog, open: false })}
-                                style={{ color: "black", border: "1px solid #E5E7EB",}}
+                                style={{ color: "black", border: "1px solid #E5E7EB", }}
                             >
                                 Trở lại
                             </Button >
@@ -218,7 +213,7 @@ const HotelManagment = () => {
                         btnCancel={
                             <Button variant="outlined"
                                 onClick={() => setDialog({ ...dialog, open: false })}
-                                style={{color: "#374151", border: "1px solid #E5E7EB", }}
+                                style={{ color: "#374151", border: "1px solid #E5E7EB", }}
                             >
                                 Trở lại
                             </Button>

@@ -60,7 +60,7 @@ const axiosClient = (port: number | null = null): AxiosInstance => {
                 const { response } = error;
 
                 if (response?.status === 401) {
-                    window.location.href = "/login-page";
+                    window.location.href = ROUTE_LINK.LOGIN;
                 }
                 console.error(error);
             } catch (e) {
