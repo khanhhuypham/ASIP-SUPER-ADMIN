@@ -27,6 +27,7 @@ export const InternalLabelTextField: React.FC<InternalLabelTextFieldProps> = ({
     disabled,
     error
 }) => {
+    const [touch, setTouch] = useState(false);
     const [isActive, setIsActive] = useState(false);
     const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -36,12 +37,15 @@ export const InternalLabelTextField: React.FC<InternalLabelTextFieldProps> = ({
     };
 
     const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+        setTouch(true);
         setIsActive(true);
     };
 
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    
         if (e.target.value === "") {
             setIsActive(false);
+            setTouch(false)
         }
     };
 
@@ -53,15 +57,15 @@ export const InternalLabelTextField: React.FC<InternalLabelTextFieldProps> = ({
 
 
     useEffect(() => {
-     
-        setIsActive(value ? true : false)
 
+        if(touch && value === "") {
+            setIsActive(true)
+        }else{
+            setIsActive(value ? true : false)
+        }
+        
     }, [value])
 
-    useEffect(() => {
-       
-
-    }, [error])
 
 
 
@@ -92,7 +96,10 @@ export const InternalLabelTextField: React.FC<InternalLabelTextFieldProps> = ({
                             type={type ?? "text"}
                             onFocus={handleFocus}
                             onBlur={handleBlur}
-                            onChange={(e) => onChange?.(e.target.value)}
+                            onChange={(e) => {
+                                console.log(e.target.value)
+                                onChange?.(e.target.value)
+                            }}
                             disabled={disabled}
                             className="disabled: bg-white"
                         />

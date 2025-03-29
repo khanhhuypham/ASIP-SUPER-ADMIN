@@ -51,8 +51,9 @@ export const HotelDetail = ({ input }: { input: Hotel }) => {
     }
 
     useEffect(() => {
-        getDetail(input.id)
-        getBranchList(input.id)
+        // getDetail(input.id)
+        // getBranchList(input.id)
+        setData(input)
     }, [input])
 
     const renderBody = () => {

@@ -1,3 +1,5 @@
+import { Hotel } from "../hotel/hotel";
+
 export class Branch {
     id: number = 0;
     avatar: string = "";
@@ -8,9 +10,9 @@ export class Branch {
     active: boolean = true
     description: string = ""
     profile_image: string = "";
-    is_active: number = 1;
     created_at: string = "";
     updated_at: string = "";
+    hotel:Hotel = new Hotel()
 
 
 
@@ -20,7 +22,7 @@ export class Branch {
 
     // Helper method để chuyển is_active number sang boolean
     get isActive(): boolean {
-        return this.is_active === 1;
+        return this.active === true;
     }
 
     // Helper method để format created_at date

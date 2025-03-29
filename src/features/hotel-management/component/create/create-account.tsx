@@ -19,17 +19,17 @@ export const CreateAccount = (
         initialValues: new LoginForm(),
         validationSchema: Yup.object({
 
-            username: Yup.string()
-                .min(2, "Độ dài tối thiểu 2 ký tự")
-                .max(50, "Độ dài tối đa 50 ký tự")
-                .required("Tên đăng nhập không được bỏ trống"),
-            password: Yup.string()
-                .min(6, "Mật khẩu phải có ít nhất 6 ký tự")
-                .required("Mật khẩu không được để trống"),
+            // username: Yup.string()
+            //     .min(2, "Độ dài tối thiểu 2 ký tự")
+            //     .max(50, "Độ dài tối đa 50 ký tự")
+            //     .required("Tên đăng nhập không được bỏ trống"),
+            // password: Yup.string()
+            //     .min(6, "Mật khẩu phải có ít nhất 6 ký tự")
+            //     .required("Mật khẩu không được để trống"),
 
-            re_enter_password: Yup.string()
-                .oneOf([Yup.ref("password"), null], "Mật khẩu nhập lại không khớp")
-                .required("Vui lòng nhập lại mật khẩu"),
+            // re_enter_password: Yup.string()
+            //     .oneOf([Yup.ref("password"), null], "Mật khẩu nhập lại không khớp")
+            //     .required("Vui lòng nhập lại mật khẩu"),
 
         }),
         onSubmit: (values) => {
