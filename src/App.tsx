@@ -18,7 +18,7 @@ function App() {
                 <Route
                     index
                     path={ROUTE_LINK.LOGIN}
-                    element={token !== "" ? <Navigate replace to={ROUTE_LINK.DASHBOARD} /> : <LoginPage />}
+                    element={token !== "" ? <Navigate replace to={ROUTE_LINK.HOTEL_MANAGEMENT} /> : <LoginPage />}
                 />
 
                 <Route element={<Layout />}>

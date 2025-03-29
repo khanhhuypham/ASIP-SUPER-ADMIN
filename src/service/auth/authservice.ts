@@ -49,10 +49,20 @@ export const authService = {
     },
 
     VerifyOtp: async (username: string, otp: string) => {
-        const { data } = await axiosClient().post<BaseResponse<User>>(`${VERSION}/auth/admin/verify-otp`,
+        const { data } = await axiosClient().post<BaseResponse<{access_token:string,user_id:number}>>(`${VERSION}/auth/admin/verify-otp`,
             {
                 username,
                 otp,
+            }
+        );
+        return data;
+    },
+
+    generateQRCode: async (userId: number) => {
+        const { data } = await axiosClient().post<BaseResponse<_2FA_Auth>>(`${VERSION}/auth/admin/generate-2fa`,
+            {
+                userId,
+                
             }
         );
         return data;

@@ -2,42 +2,38 @@ import { useFormik } from "formik";
 
 import * as Yup from "yup";
 import { useEffect, useState } from "react";
-import { Hotel } from "../../../../model/hotel/hotel";
 import { ExternalLabelTextField } from "../../../../components/custom/field/external-label-textfield";
-import { emailRegex, phoneRegExp } from "../../../../constants/regex";
-import { ExternalLabelTextArea } from "../../../../components/custom/field/external-label-textarea";
-import { Branch } from "../../../../model/branch/branch";
+import { LoginForm } from "../../../../model/user/login-form";
+import IconEyeSlash from "../../../../components/icons/icon-eye-slash";
+import IconEye from "../../../../components/icons/icon-eye";
 
 
 
 export const CreateAccount = (
-        { data, onComplete,onRollBack }: 
-        { data: Branch, onComplete?: (() => void),onRollBack?: (() => void)}
+    { data, onComplete, onRollBack }:
+    { data: LoginForm, onComplete?: ((agr0: LoginForm) => void), onRollBack?: (() => void) }
 ) => {
-    const [files, setFiles] = useState<FileList | undefined>()
-
-
+    const [showPassword, setShowPassword] = useState(false);
+    const [showReEnterPassword, setShowReEnterPassword] = useState(false);
     const formik = useFormik({
-        initialValues: new Branch(),
+        initialValues: new LoginForm(),
         validationSchema: Yup.object({
-            // name: Yup.string()
-            //     .min(2, "Độ dài tối thiểu 2 ký tự")
-            //     .max(50, "Độ dài tối đa 50 ký tự")
-            //     .required("Tên khách hàng không được bỏ trống"),
 
+            username: Yup.string()
+                .min(2, "Độ dài tối thiểu 2 ký tự")
+                .max(50, "Độ dài tối đa 50 ký tự")
+                .required("Tên đăng nhập không được bỏ trống"),
+            password: Yup.string()
+                .min(6, "Mật khẩu phải có ít nhất 6 ký tự")
+                .required("Mật khẩu không được để trống"),
 
-            // phone: Yup.string()
-            //     .matches(phoneRegExp, "số điện thoại không hợp lệ")
-            //     .required("Số điện thoại không được để trống"),
-
-            // email: Yup.string()
-            //     .matches(emailRegex, "Email không hợp lệ")
-            //     .nullable(),
+            re_enter_password: Yup.string()
+                .oneOf([Yup.ref("password"), null], "Mật khẩu nhập lại không khớp")
+                .required("Vui lòng nhập lại mật khẩu"),
 
         }),
         onSubmit: (values) => {
-            onComplete && onComplete()
-
+            onComplete && onComplete(values)
         },
     });
 
@@ -50,16 +46,7 @@ export const CreateAccount = (
 
 
     useEffect(() => {
-
-        if (data.id == 0) {
-            formik.resetForm()
-            setFiles(undefined)
-            formik.setFieldValue("code", generateRandomCode())
-        } else {
-            formik.setValues(data)
-
-        }
-
+        formik.setValues(data)
     }, [data])
 
 
@@ -73,12 +60,12 @@ export const CreateAccount = (
 
                     <ExternalLabelTextField
                         label="Tên tài khoản"
-                        name="name"
+                        name="username"
                         placeholder="Nhập thông tin"
-                        value={formik.values.name}
-                        error={formik.errors.name}
+                        value={formik.values.username}
+                        error={formik.touched.username && formik.errors.username}
                         onChange={(value) => {
-                            formik.setFieldValue("name", value)
+                            formik.setFieldValue("username", value)
                         }}
                         required
                     />
@@ -87,36 +74,56 @@ export const CreateAccount = (
 
                     <ExternalLabelTextField
                         label="Mật khẩu"
-                        name="phone"
-                        type="password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
                         placeholder="Nhập mật khẩu"
-                        value={formik.values.phone}
-                        error={formik.errors.phone}
+                        value={formik.values.password}
+                        error={formik.touched.password && formik.errors.password}
                         onChange={(value) => {
-                            formik.setFieldValue("phone", value)
+                            formik.setFieldValue("password", value)
                         }}
                         required
+                        suffix={
+                            <button
+                                className="underline text-sm"
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                    setShowPassword(!showPassword)
+                                }}
+                            >{showPassword ? <IconEyeSlash/> : <IconEye/>}</button>
+                        }
                     />
 
                     <ExternalLabelTextField
                         label="Nhập lại mật khẩu"
-                        name="phone"
+                        name="re_enter_password"
                         placeholder="Nhập mật khẩu"
-                        type="password"
-                        value={formik.values.phone}
-                        error={formik.errors.phone}
+                        type={showReEnterPassword ? "text" : "password"}
+                        value={formik.values.re_enter_password}
+                        error={formik.touched.re_enter_password && formik.errors.re_enter_password}
                         onChange={(value) => {
-                            formik.setFieldValue("phone", value)
+                            formik.setFieldValue("re_enter_password", value)
                         }}
                         required
+                        suffix={
+                            <button
+                                className="underline text-sm"
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                    setShowReEnterPassword(!showReEnterPassword)
+                                }}
+                            >{showReEnterPassword ? <IconEyeSlash/> : <IconEye/>}</button>
+                        }
                     />
 
 
                     <div className='flex justify-end gap-2'>
-                        <button  className="border px-4 py-2 rounded-lg" onClick={() => onRollBack && onRollBack()}>
+                        <button className="border px-4 py-2 rounded-lg h-9" onClick={() => onRollBack && onRollBack()}>
                             Trở lại
                         </button>
-                        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg">
+                        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg h-9">
                             Hoàn tất
                         </button>
                     </div>
@@ -127,5 +134,3 @@ export const CreateAccount = (
         </div>
     )
 };
-
-

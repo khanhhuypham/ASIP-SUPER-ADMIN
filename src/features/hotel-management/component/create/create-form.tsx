@@ -13,26 +13,61 @@ import { Branch } from "../../../../model/branch/branch";
 import { CreateAccount } from "./create-account";
 import { CreateAccountSuccess } from "./create-account-success";
 import { LoginForm } from "../../../../model/user/login-form";
+import { encodePassword } from "../../../../utils/helpers";
+import { hotelService } from "../../../../service/hotel-service/hotel-service";
+import { message } from "antd";
 
 
 
-export const CreateForm = ({ data, onComplete }: { data: Hotel, onComplete?: (() => void) }) => {
+export const CreateForm = ({ data, onComplete,onCancel }: { data: Hotel, onComplete?: (() => void),onCancel?: (() => void)}) => {
 
     const [tours, setTours] = useState<Tour[]>([
-        { id: 1, label: "Tạo khách hàng", active: false, completed: false },
+        { id: 1, label: "Tạo khách sạn", active: false, completed: false },
         { id: 2, label: "Tạo chi nhánh", active: false, completed: false },
         { id: 3, label: "Tạo tài khoản", active: false, completed: false },
         { id: 4, label: "Thành công", active: false, completed: false }
     ])
 
+    const [hotel, setHotel] = useState<Hotel>(new Hotel())
+
+    const [branch, setBranch] = useState<Branch>(new Branch())
+
+    const [loginForm, setLoginForm] = useState<LoginForm>(new LoginForm())
 
     useEffect(() => {
         updateTourStep(1)
+        setHotel(new Hotel())
+        setBranch(new Branch())
+        setLoginForm(new LoginForm())
+
     }, [data])
+
+
+
+    const create = (data: LoginForm) => {
+        const login = {...data, password: encodePassword(data.password) }
+
+        hotelService.create(hotel, branch, login).then((res) => {
+          
+            if (res.status == 200) {
+                const lastActiveTour = [...tours].reverse().find(tour => tour.active);
+                if (!lastActiveTour) return null;
+         
+                setLoginForm(data)
+                updateTourStep(lastActiveTour.id + 1)
+                message.success("Tao khách sạn thành công");
+            } else {
+        
+                message.error(res.message);
+            }
+        })
+
+    }
+
 
     const updateTourStep = (newActiveId: number) => {
 
-  
+
         setTours((prevTours) =>
             prevTours.map((tour) =>
                 tour.id === newActiveId
@@ -46,41 +81,51 @@ export const CreateForm = ({ data, onComplete }: { data: Hotel, onComplete?: (()
 
 
 
+
     const renderContent = () => {
         const lastActiveTour = [...tours].reverse().find(tour => tour.active);
 
         if (!lastActiveTour) return null;
 
-        const commonProps = {
-            onComplete: () => updateTourStep(lastActiveTour.id + 1),
-            onRollBack: () => updateTourStep(lastActiveTour.id - 1),
-        };
-
         switch (lastActiveTour.id) {
             case 1:
-                return <CreateHotel data={data} {...commonProps} />;
+                return <CreateHotel data={hotel}
+                    onComplete={(value: Hotel) => {
+                        updateTourStep(lastActiveTour.id + 1)
+                        setHotel(value)
+                    }}
+                    onCancel={onCancel}
+                />;
             case 2:
-                return <CreateBranch data={new Branch()} {...commonProps} />;
+                return <CreateBranch data={branch}
+                    onComplete={(value: Branch) => {
+                        updateTourStep(lastActiveTour.id + 1)
+                        setBranch(value)
+                    }}
+                    onRollBack={() => updateTourStep(lastActiveTour.id - 1)}
+                />;
             case 3:
-                return <CreateAccount data={new Branch()} {...commonProps} />;
+                return <CreateAccount data={loginForm}
+                    onComplete={(value: LoginForm) =>  create(value)}
+                    onRollBack={() => updateTourStep(lastActiveTour.id - 1)}
+                />;
             case 4:
-                return <CreateAccountSuccess data={new LoginForm()} onComplete={onComplete} />;
+                return <CreateAccountSuccess hotel={hotel} loginForm={loginForm} onComplete={onComplete} />;
+
             default:
                 return null;
         }
     }
 
+
     return (
         <div className="space-y-6 w-full">
-            
-            <div className="w-[750px]">
+
+            <div className="w-full">
                 <HorizontalLineTour tours={tours} />
             </div>
-           
 
             {renderContent()}
-
-
         </div>
     )
 };

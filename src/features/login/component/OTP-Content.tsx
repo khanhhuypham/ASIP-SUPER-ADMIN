@@ -1,23 +1,28 @@
-import { Button, message, QRCode } from "antd";
+import { Button, message, QRCode, QRCodeProps, Space, Spin } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logoCompany from "../../../assets/images/logo-company.png"
 import { SyncOutlined } from '@ant-design/icons';
 import { authService } from "../../../service/auth/authservice";
 import { ROUTE_LINK } from "../../../router/module-router";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "../../../store/userSlice";
 import { User } from "../../../model/user/user";
 import { _2FA_Auth } from "../../../model/user/_2FAAuth";
+import { CheckCircleFilled, CloseCircleFilled, ReloadOutlined } from '@ant-design/icons';
+import { QRStatus } from "antd/es/qr-code/interface";
+import { IRootState } from "../../../store";
 
-
-
-
-export const OPTContent = ({ data }: { data: _2FA_Auth }) => {
+export const OPTContent = ({ data, onComplete }: { data: _2FA_Auth, onComplete?: (() => void) }) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const loginForm = useSelector((state: IRootState) => state.userData.loginForm);
     const [loading, setLoading] = useState(false);
+    const [QRCodeStatus, setQRCodeStatus] = useState<QRStatus>("scanned");
     const [_2FASecret, set_2FASecret] = useState<_2FA_Auth>(new _2FA_Auth());
+
+
+
     const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
     const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -28,7 +33,6 @@ export const OPTContent = ({ data }: { data: _2FA_Auth }) => {
         const newOtp = [...otp];
         newOtp[index] = value;
         setOtp(newOtp);
-
 
         // If a digit was entered (value is not empty) AND it's not the last input field
         if (value && index < otp.length - 1) { // Use otp.length instead of undefined 'length'
@@ -42,9 +46,11 @@ export const OPTContent = ({ data }: { data: _2FA_Auth }) => {
 
         authService.VerifyOtp(username, OTP).then((res) => {
 
-            if (res.status == 200) {
-                dispatch(setUser(new User({ access_token: res.data.access_token })))
+            if (res.status == 201) {
+                console.log("res: ", res);
+                dispatch(setUser(new User({ access_token: res.data.access_token, id: res.data.user_id })))
                 navigate(ROUTE_LINK.HOTEL_MANAGEMENT)
+                onComplete && onComplete()
             } else {
                 message.error(res.message)
             }
@@ -57,13 +63,88 @@ export const OPTContent = ({ data }: { data: _2FA_Auth }) => {
     };
 
 
+    const getQRcode = () => {
+        setQRCodeStatus("loading")
+        authService.generateQRCode(1).then((res) => {
+
+            if (res.status == 201) {
+                setQRCodeStatus("active")
+                setOtp(["", "", "", "", "", ""])
+                inputsRef.current[0]?.focus();
+                set_2FASecret(res.data)
+
+            } else {
+                setQRCodeStatus("scanned")
+                message.error(res.message)
+            }
+
+        })
+
+    };
+
+    const handleKeyDown = (index: number, event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === "Backspace" && otp[index] === "") {
+            // If the current input is empty and Backspace is pressed, move to the previous input
+            if (index > 0) {
+                inputsRef.current[index - 1]?.focus();
+            }
+        }
+    };
+
+
+    const customStatusRender: QRCodeProps['statusRender'] = (info) => {
+        switch (info.status) {
+            case 'expired':
+                return (
+                    <div>
+                        <CloseCircleFilled style={{ color: 'red' }} /> {info.locale?.expired}
+                        <p>
+                            <Button type="link" onClick={info.onRefresh}>
+                                <ReloadOutlined /> {info.locale?.refresh}
+                            </Button>
+                        </p>
+                    </div>
+                );
+            case 'loading':
+                return (
+                    <Space direction="vertical">
+                        <Spin />
+                        <p>Loading...</p>
+                    </Space>
+                );
+            case 'scanned':
+                return (
+                    <div className="flex flex-col gap-2">
+                        <div>
+                            <CheckCircleFilled style={{ color: 'green' }} /> {info.locale?.scanned}
+                        </div>
+
+                        <Button type="text" icon={<ReloadOutlined />} onClick={() => getQRcode()}>
+                            Refresh
+                        </Button>
+                    </div>
+                );
+            default:
+                return null;
+        }
+    };
 
 
     useEffect(() => {
+
         set_2FASecret(data)
         setOtp(["", "", "", "", "", ""])
         inputsRef.current = inputsRef.current.slice(0, otp.length);
-        
+        // Automatically focus the first input when the component appears
+        inputsRef.current[0]?.focus();
+
+        if(loginForm.QR_Code_Of_2FA && loginForm.QR_Code_Of_2FA == data.QR_Code){
+            setQRCodeStatus("scanned")
+        }else{
+            setQRCodeStatus("active")
+        }
+
+
     }, [data])
 
 
@@ -77,12 +158,18 @@ export const OPTContent = ({ data }: { data: _2FA_Auth }) => {
                 <p className="text-sm text-gray-500">Nhập mã xác minh gồm 6 chữ số đã được gửi tới Google Authenticator của bạn.</p>
             </div>
 
-            <div className="flex justify-center w-full">
-                {/* <QRCode value={_2FASecret.qr_code}  errorLevel="H" size={250} /> */}
-                <div className="border bg-white rounded-lg">
-                    <img src={_2FASecret.QR_Code} width={250} height={250} className="object-contain rounded-lg"/>
-                </div>
+            <div className="flex flex-col items-center w-full">
+                {
+                    QRCodeStatus === "active" && (
+                        <div className="flex justify-start w-[250px]">
+                            <Button type="text" icon={<ReloadOutlined />} onClick={() => getQRcode()}>
+                                Refresh
+                            </Button>
+                        </div>
+                    )
+                }
 
+                <QRCode value={_2FASecret.QR_Code} size={250} status={QRCodeStatus} onRefresh={getQRcode} statusRender={customStatusRender} />
             </div>
 
             <div className="flex justify-center gap-3">
@@ -94,6 +181,7 @@ export const OPTContent = ({ data }: { data: _2FA_Auth }) => {
                         value={value}
                         maxLength={1}
                         onChange={(event) => handleChange(index, event)}
+                        onKeyDown={(event) => handleKeyDown(index, event)} // Add this line
                         style={{
                             width: "40px",
                             height: "40px",
@@ -121,6 +209,4 @@ export const OPTContent = ({ data }: { data: _2FA_Auth }) => {
         </div>
     )
 }
-
-
 

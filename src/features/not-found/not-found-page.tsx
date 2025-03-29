@@ -7,6 +7,8 @@ import { IRootState } from "../../store";
 import { ROUTE_LINK } from "../../router/module-router";
 
 
+
+
 const NotFoundPage = () => {
     const isDark = useSelector(
         (state: IRootState) =>
@@ -26,7 +28,7 @@ const NotFoundPage = () => {
                         404 - Trang bạn tìm không tồn tại!
                     </p>
                     <Link
-                        to={ROUTE_LINK.DASHBOARD}
+                        to={ROUTE_LINK.HOTEL_MANAGEMENT}
                         className="btn btn-gradient mx-auto !mt-7 w-max border-0 uppercase shadow-none"
                     >
                         Home
@@ -36,5 +38,7 @@ const NotFoundPage = () => {
         </div>
     );
 };
+
+
 
 export default NotFoundPage;

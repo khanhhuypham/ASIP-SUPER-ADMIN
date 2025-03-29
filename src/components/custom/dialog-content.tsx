@@ -3,15 +3,16 @@ import { Button } from "antd";
 
 
 interface DialogContentProps {
-
     title?: string;
     content?: string | React.ReactNode;
     icon?: React.ReactNode;
+    btnCancel?: React.ReactNode;
     btnConfirm?: React.ReactNode;
     onConfirm?: (() => void);
 }
 
-export const DialogContent = ({ title, content, icon, btnConfirm, onConfirm }: DialogContentProps) => {
+
+export const DialogContent = ({ title, content, icon, btnCancel, btnConfirm, onConfirm }: DialogContentProps) => {
 
 
     return (
@@ -30,7 +31,11 @@ export const DialogContent = ({ title, content, icon, btnConfirm, onConfirm }: D
                     </p>
                 </div>
                 
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-3">
+                    {
+                        btnCancel && btnCancel
+                    }
+
                     {
                         btnConfirm
                         ? btnConfirm

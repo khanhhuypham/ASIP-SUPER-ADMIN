@@ -4,22 +4,27 @@ import Cookies from 'js-cookie';
 import { IRootState } from ".";
 import { COOKIE_KEYS } from "../constants/cookie-key";
 import { User } from "../model/user/user";
+import { LoginForm } from "../model/user/login-form";
 
 
 
 export interface IUserState {
     user: User;
+    loginForm: LoginForm;
 }
 
 // Retrieve the user from cookies and parse it safely
 const storedUser = Cookies.get(COOKIE_KEYS.USER);
+const storedLoginForm = Cookies.get(COOKIE_KEYS.LOGINFORM);
 
 
-console.log(storedUser)
 
 const initialState: IUserState = {
     user: storedUser ? (JSON.parse(storedUser) as User) : new User(),
+    loginForm: storedLoginForm ? (JSON.parse(storedLoginForm) as LoginForm) : new LoginForm(),
 };
+
+
 
 export const userSlice = createSlice({
     name: "user",

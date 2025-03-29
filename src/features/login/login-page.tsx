@@ -9,24 +9,25 @@ import { useEffect, useState } from "react";
 import { Button, message, Modal } from "antd";
 import { SyncOutlined } from '@ant-design/icons';
 import Checkbox from "../../components/custom/checkbox";
-import { useNavigate } from "react-router-dom";
-import { ROUTE_LINK } from "../../router/module-router";
-import { useDispatch } from "react-redux";
-import { setUser } from "../../store/userSlice";
-import { User } from "../../model/user/user";
+import { useSelector } from "react-redux";
+
 import { authService } from "../../service/auth/authservice";
-import { encodePassword } from "../../utils/helpers";
 import { PopupInterface } from "../../constants/interface";
 import { OPTContent } from "./component/OTP-Content";
 import { _2FA_Auth } from "../../model/user/_2FAAuth";
+import { IRootState } from "../../store";
+import Cookies from "js-cookie";
+import { COOKIE_KEYS } from "../../constants/cookie-key";
 
 
 export const LoginPage = () => {
-
+    const userSlice = useSelector((state: IRootState) => state.userData);
     const [loading, setLoading] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [dialog, setDialog] = useState<PopupInterface>({ open: false, title: "" });
+
+
 
     const formik = useFormik({
         initialValues: new LoginForm(),
@@ -42,6 +43,7 @@ export const LoginPage = () => {
             password: Yup.string()
                 .required("Mật khẩu không được bỏ trống"),
 
+
         }),
         onSubmit: (values) => {
 
@@ -54,9 +56,9 @@ export const LoginPage = () => {
     const signIn = (username: string, password: string) => {
 
         authService.SignIn(username, password).then((res) => {
-
+            
             if (res.status == 201) {
-                showQRCode({...res.data,username:username})
+                showQRCode({ ...res.data, username: username })
             } else {
                 message.error(res.message)
             }
@@ -70,15 +72,44 @@ export const LoginPage = () => {
 
 
 
+
     const showQRCode = (data: _2FA_Auth) => {
-        let component = <OPTContent data={data} />
+  
+        let component = <OPTContent data={data} onComplete={() => {
+
+            Cookies.set(COOKIE_KEYS.REMEMBER_ME, JSON.stringify(rememberMe), { expires: 24 * 60 * 60 });
+
+            if (rememberMe) {
+                let loginForm = {...formik.values,QR_Code_Of_2FA:data.QR_Code}
+                Cookies.set(COOKIE_KEYS.LOGINFORM, JSON.stringify(loginForm), { expires: 24 * 60 * 60 });
+            } else {
+                Cookies.remove(COOKIE_KEYS.LOGINFORM);
+            }
+
+        }} />
         setDialog({ ...dialog, open: true, content: component, title: "Chi tiết khách sạn" })
     }
 
 
+
+
     useEffect(() => {
         formik.resetForm()
+ 
+        const storedValue = Cookies.get(COOKIE_KEYS.REMEMBER_ME);
+
+        if (storedValue) {
+            const rememberMe = JSON.parse(storedValue) as boolean;
+            setRememberMe(rememberMe);
+
+            if (rememberMe) {
+                formik.setFieldValue("username", userSlice.loginForm.username)
+                formik.setFieldValue("password", userSlice.loginForm.password)
+            }
+        }
+
     }, [])
+
 
 
     return (

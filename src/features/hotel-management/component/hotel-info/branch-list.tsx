@@ -1,20 +1,48 @@
 import { Table, TableProps } from "antd"
 import { Hotel } from "../../../../model/hotel/hotel";
+import { useEffect, useRef, useState } from "react";
+import { Branch } from "../../../../model/branch/branch";
 
-export const BranchList = ({ data }: { data: Hotel }) => {
+export const BranchList = ({ list }: { list: Branch[] }) => {
+    const [tableMaxHeight, setTableMaxHeight] = useState(0);
+    const tableRef = useRef<HTMLDivElement>(null);
 
-    return  <Table<DataType> columns={columns} dataSource={dataSource} />
+    useEffect(() => {
+        const handleResize = () => {
+
+            let remainingHeight = 400
+
+            setTableMaxHeight(remainingHeight);
+
+            if (tableRef.current) {
+                const tableBody = tableRef.current.querySelector('.ant-table-body');
+                if (tableBody) {
+                    (tableBody as HTMLElement).style.minHeight = `${remainingHeight}px`;
+                }
+            }
+
+        };
+        handleResize();
+        // window.addEventListener("resize", handleResize);
+        // return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+
+
+    return (
+        <div ref={tableRef}>
+            <Table<Branch> columns={columns} dataSource={list}  tableLayout="auto"
+                scroll={{
+                    y: tableMaxHeight - 100 // minus footer height
+                }} 
+            />
+        </div>
+    )
 }
 
-interface DataType {
-    key: string;
-    name: string;
-    created_at: string;
-    phone:string;
 
-}
 
-const columns: TableProps<DataType>['columns'] = [
+const columns: TableProps<Branch>['columns'] = [
     {
         title: 'Tên chi nhánh',
         dataIndex: 'name',
@@ -29,31 +57,5 @@ const columns: TableProps<DataType>['columns'] = [
         dataIndex: 'created_at',
 
     },
-
-
 ];
 
-const dataSource: DataType[] = [
-    {
-        key: '1',
-        name: 'HD0000001',
-        created_at: "09:00 - 01/01/2025",
-        phone:"0938271555",
-     
-    
-    },
-    {
-        key: '2',
-        name: 'HD0000002',
-        created_at: "09:00 - 01/01/2025",
-        phone:"0938271555"
-
-    },
-    {
-        key: '3',
-        name: 'HD0000003',
-        created_at: "09:00 - 01/01/2025",
-        phone:"0938271555",
-      
-    },
-];

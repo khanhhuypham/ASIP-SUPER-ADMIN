@@ -7,34 +7,22 @@ import { InternalLabelTextField } from "../../../../components/custom/field/inte
 import { Button } from "antd";
 import { LoginForm } from "../../../../model/user/login-form";
 import IconCreateSuccess from "../../../../assets/images/icon-create-success.png";
+import { Hotel } from "../../../../model/hotel/hotel";
+import IconEyeSlash from "../../../../components/icons/icon-eye-slash";
+import IconEye from "../../../../components/icons/icon-eye";
 
 
 
-export const CreateAccountSuccess = ({ data, onComplete }: { data: LoginForm, onComplete?: (() => void) }) => {
-    const [files, setFiles] = useState<FileList | undefined>()
+
+export const CreateAccountSuccess = ({ hotel, loginForm, onComplete }: { hotel: Hotel, loginForm: LoginForm, onComplete?: (() => void) }) => {
+
     const [showPassword, setShowPassword] = useState(false);
-
-
-    const formik = useFormik({
-        initialValues: new LoginForm(),
-
-        validationSchema: Yup.object({
-
-
-        }),
-        onSubmit: (values) => {
-
-
-        },
-    });
-
-
 
 
 
     useEffect(() => {
-        formik.setValues(data)
-    }, [data])
+        console.log(hotel, loginForm)
+    }, [hotel, loginForm])
 
 
     return (
@@ -50,31 +38,22 @@ export const CreateAccountSuccess = ({ data, onComplete }: { data: LoginForm, on
                 <InternalLabelTextField
                     label="Mã khách sạn"
                     name="hotel_code"
-                    value={formik.values.hotel_code}
-                    onChange={(value) => {
-                        formik.setFieldValue("hotel_code", value)
-                    }}
-                    required
+                    value={hotel.code}
+                    disabled={true}
                 />
 
                 <InternalLabelTextField
                     label="Tên tài khoản"
                     name="username"
-                    value={formik.values.username}
-                    onChange={(value) => {
-                        formik.setFieldValue("username", value)
-                    }}
-                    required
+                    value={loginForm.username}
+                    disabled={true}
                 />
 
                 <InternalLabelTextField
                     label="Mật khẩu"
                     name="password"
-                    value={formik.values.password}
-                    onChange={(value) => {
-                        formik.setFieldValue("password", value)
-                    }}
-                    required
+                    value={loginForm.password}
+                    disabled={true}
                     type={showPassword ? "text" : "password"}
                     suffix={
                         <button
@@ -84,7 +63,7 @@ export const CreateAccountSuccess = ({ data, onComplete }: { data: LoginForm, on
                                 e.stopPropagation()
                                 setShowPassword(!showPassword)
                             }}
-                        >{showPassword ? "Ẩn" : "Hiện"}</button>
+                        >{showPassword ? <IconEyeSlash /> : <IconEye/>}</button>
                     }
                 />
 
@@ -104,5 +83,4 @@ export const CreateAccountSuccess = ({ data, onComplete }: { data: LoginForm, on
         </div>
     )
 };
-
 
