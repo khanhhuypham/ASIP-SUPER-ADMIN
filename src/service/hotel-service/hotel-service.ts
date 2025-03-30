@@ -107,8 +107,7 @@ export const hotelService = {
         const apiClient = axiosClient(ProjectId); // Use the factory function
 
         try {
-            const response = await apiClient.patch<BaseResponse<undefined>>(
-                `${VERSION}/hotel/${hotel.id}`,
+            const response = await apiClient.patch<BaseResponse<undefined>>(`${VERSION}/hotel/${hotel.id}`,
                 {
                     name: hotel.name,
                     email: hotel.email,
@@ -133,8 +132,7 @@ export const hotelService = {
         const apiClient = axiosClient(ProjectId); // Use the factory function
 
         try {
-            const response = await apiClient.get<BaseResponse<Hotel>>(
-                `${VERSION}/company/${id}/detail`
+            const response = await apiClient.get<BaseResponse<Hotel>>( `${VERSION}/company/${id}/detail`
             );
             // 3. Return the data from the response
             return response.data;

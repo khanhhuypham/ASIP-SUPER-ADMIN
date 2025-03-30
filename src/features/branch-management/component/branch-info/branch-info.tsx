@@ -1,9 +1,6 @@
 import { Avatar, Tag } from "antd";
-
-
-import iconApple from "../../../assets/images/icon-apple.png"
-import { Branch } from "../../../model/branch/branch";
-
+import { Branch } from "../../../../model/branch/branch";
+import iconApple from "../../../../assets/images/icon-apple.png"
 export const BranchInfor = ({ data }: { data: Branch }) => {
 
     const Status = () => {

@@ -11,9 +11,10 @@ import { reportFilter } from "../../constants/constant"
 import { Branch } from "../../model/branch/branch"
 import { BranchManagementTable } from "./component/branch-management-table"
 
-import { BranchInfor } from "./component/branch-detail"
+
 import { CreateBranch } from "./component/create-branch"
 import { branchService } from "../../service/branch-service/branch-service"
+import { BranchDetail } from "./component/branch-info/branch-detail"
 
 const { RangePicker } = DatePicker;
 
@@ -75,7 +76,7 @@ const BranchManagment = () => {
 
 
     const showDetailModal = (data: Branch) => {
-        let component = <BranchInfor data={data} />
+        let component = <BranchDetail input={data} />
         setDialog({ ...dialog, open: true, content: component, title: "Chi tiết chi nhánh" })
     }
 
