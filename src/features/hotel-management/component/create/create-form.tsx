@@ -8,7 +8,7 @@ import { emailRegex, phoneRegExp } from "../../../../constants/regex";
 import { ExternalLabelTextArea } from "../../../../components/custom/field/external-label-textarea";
 import { HorizontalLineTour, Tour } from "../../../../components/custom/tour-custom";
 import { CreateHotel } from "./create-hotel";
-import { CreateBranch } from "./create-branch";
+
 import { Branch } from "../../../../model/branch/branch";
 import { CreateAccount } from "./create-account";
 import { CreateAccountSuccess } from "./create-account-success";
@@ -16,6 +16,7 @@ import { LoginForm } from "../../../../model/user/login-form";
 import { encodePassword } from "../../../../utils/helpers";
 import { hotelService } from "../../../../service/hotel-service/hotel-service";
 import { message } from "antd";
+import { CreateBranch } from "../../../branch-management/component/create-branch";
 
 
 

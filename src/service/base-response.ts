@@ -9,9 +9,10 @@ export enum HttpMethod {
     POST = "POST",
 }
 
-export interface Pagination<T> {
+export interface Pagination<T,P = any> {
     limit: number;
     total_record: number;
     list: T;
+    statistic: P;
 }
 

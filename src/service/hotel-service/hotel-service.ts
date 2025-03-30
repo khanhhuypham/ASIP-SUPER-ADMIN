@@ -14,8 +14,7 @@ export const hotelService = {
         const apiClient = axiosClient(ProjectId); // Use the factory function
 
         try {
-            const response = await apiClient.get<BaseResponse<Pagination<Hotel[]>>>(
-                `${VERSION}/company`,
+            const response = await apiClient.get<BaseResponse<Pagination<Hotel[],HotelStatistics>>>(`${VERSION}/hotel`,
                 {
                     params: {
                         is_active: param.is_active,
@@ -70,8 +69,7 @@ export const hotelService = {
         const apiClient = axiosClient(ProjectId); // Use the factory function
 
         try {
-            const response = await apiClient.post<BaseResponse<undefined>>(
-                `${VERSION}/company/create`,
+            const response = await apiClient.post<BaseResponse<undefined>>(`${VERSION}/hotel`,
                 {
                     name: hotel.name,
                     code: hotel.code,
@@ -80,14 +78,16 @@ export const hotelService = {
                     owner_name: hotel.owner_name,
                     note: hotel.note,
 
-                    branch_name: branch.name,
-                    branch_email: branch.email,
-                    branch_phone: branch.phone,
-                    branch_address: branch.address,
-                    description: branch.description,
+                    branch:{
+                        name: branch.name,
+                        email: branch.email,
+                        phone: branch.phone,
+                        address: branch.address,
+                        note: branch.description,
+                    },
 
-                    username: loginForm.username,
-                    password: loginForm.password,
+                    // username: loginForm.username,
+                    // password: loginForm.password,
                 }
             );
             // 3. Return the data from the response
@@ -107,8 +107,7 @@ export const hotelService = {
         const apiClient = axiosClient(ProjectId); // Use the factory function
 
         try {
-            const response = await apiClient.post<BaseResponse<undefined>>(
-                `${VERSION}/company/${hotel.id}/update`,
+            const response = await apiClient.patch<BaseResponse<undefined>>(`${VERSION}/hotel/${hotel.id}`,
                 {
                     name: hotel.name,
                     email: hotel.email,
@@ -133,8 +132,7 @@ export const hotelService = {
         const apiClient = axiosClient(ProjectId); // Use the factory function
 
         try {
-            const response = await apiClient.get<BaseResponse<Hotel>>(
-                `${VERSION}/company/${id}/detail`
+            const response = await apiClient.get<BaseResponse<Hotel>>( `${VERSION}/company/${id}/detail`
             );
             // 3. Return the data from the response
             return response.data;
@@ -153,9 +151,7 @@ export const hotelService = {
         const apiClient = axiosClient(ProjectId); // Use the factory function
 
         try {
-            const response = await apiClient.post<BaseResponse<undefined>>(
-                `${VERSION}/company/${id}/change-is-active`
-            );
+            const response = await apiClient.get<BaseResponse<undefined>>(`${VERSION}/hotel/${id}/change-status`);
             // 3. Return the data from the response
             return response.data;
         } catch (error) {

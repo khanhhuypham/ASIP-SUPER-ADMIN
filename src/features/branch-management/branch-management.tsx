@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { PopupInterface } from "../../constants/interface"
-import { Button, Input, Modal, Select, DatePicker } from "antd"
+import { Button, Input, Modal, Select, DatePicker, message } from "antd"
 import { Hotel } from "../../model/hotel/hotel"
 import { tab_filter_id } from "../../constants/tag-id"
 import { DialogContent } from "../../components/custom/dialog-content"
@@ -10,18 +10,19 @@ import { TabBar } from "../../components/custom/tab-bar"
 import { reportFilter } from "../../constants/constant"
 import { Branch } from "../../model/branch/branch"
 import { BranchManagementTable } from "./component/branch-management-table"
-import { CreateBranch } from "../hotel-management/component/create/create-branch"
-import { BranchInfor } from "./component/branch-detail"
+
+
+import { CreateBranch } from "./component/create-branch"
+import { branchService } from "../../service/branch-service/branch-service"
+import { BranchDetail } from "./component/branch-info/branch-detail"
 
 const { RangePicker } = DatePicker;
 
 export interface BranchManagmentListProps {
     data: Branch[]
-    loading: boolean,
+    loading: boolean
     search_key?: string
-    onPageChange?: ((page: number) => void)
     onEdit?: ((arg0: Branch) => void)
-    onResetPWD?: ((arg0: Branch) => void)
     onChangeStatus?: ((arg0: Branch) => void)
     onShowDetail?: ((arg0: Branch) => void)
 }
@@ -31,62 +32,109 @@ export interface BranchManagmentListProps {
 const BranchManagment = () => {
 
     const [dialog, setDialog] = useState<PopupInterface>({ open: false, content: undefined, title: "" });
-    const [data, setData] = useState<Branch[]>([
-        new Branch({ id: 1 }),
-        new Branch({ id: 2 }),
-        new Branch({ id: 3 }),
-        new Branch({ id: 4 }),
-    ])
+    const [data, setData] = useState<Branch[]>([])
     const [fullData, setFullData] = useState<Branch[]>([])
 
 
-    const tabs = [
-        { id: 1, label: "tất cả" },
-        { id: 2, label: "Đang hoạt động (30)" },
-        { id: 3, label: "Ngừng hoạt động (30)" },
 
-    ];
+    const getList = () => {
 
-    const getRoomtType = () => {
+        branchService.getList(1).then((res) => {
+            if (res.status == 200) {
+                setData(res.data);
+                setFullData(res.data)
+            } else {
+                message.error(res.message)
+            }
+        })
+    }
 
+    const changeStatus = (branch:Branch) => {
+
+        branchService.changeStatus(branch.id).then((res) => {
+            if (res.status == 200) {
+                getList()
+            } else {
+                message.error(res.message)
+            }
+        })
     }
 
     useEffect(() => {
-        getRoomtType()
+        getList()
     }, []);
 
 
 
     const showModalCreate = (data: Branch) => {
-        let component = <CreateBranch data={new Branch()} />;
-
+        let component = <CreateBranch data={data} onComplete={(_) => {
+            getList()
+            setDialog({ ...dialog, open: false })
+        }}/>;
         setDialog({ ...dialog, open: true, content: component, title: data.id == 0 ? "Tạo khách sạn" : "Chỉnh sửa khách sạn" })
     }
 
 
-
-
     const showDetailModal = (data: Branch) => {
-        let component = <BranchInfor data={data} />
+        let component = <BranchDetail input={data} />
         setDialog({ ...dialog, open: true, content: component, title: "Chi tiết chi nhánh" })
     }
 
 
-    const showResetPWDModal = (data: Branch) => {
-
-    }
-
 
     const showModalConfirm = (data: Branch) => {
-        let content = <DialogContent
-            icon={<p className="p-3 bg-red-100 w-fit rounded-full text-center"><IconPause /></p>}
-            title="Tạm ngưng khách sạn?"
-            content={<p>Bạn có chắc chắn muốn tạm ngưng khách sạn <b>{data.name}</b> này không?</p>}
-            btnConfirm={<Button color="danger" variant="solid">Xác nhận</Button>}
-        />
+        let content = <></>
+
+        if (data.active) {
+
+            content = <DialogContent
+                icon={<p className="p-3 bg-red-100 w-fit rounded-full text-center"><IconPause /></p>}
+                title="Tạm ngưng chinh nhánh?"
+                content={<p>Bạn có chắc chắn muốn tạm ngưng chi nhánh <b>{data.name}</b> của khách sạn <b>{data.hotel?.name ?? ""}</b> không?</p>}
+                btnConfirm={
+                    <Button color="red" variant="solid" onClick={() => {
+                        changeStatus(data)
+                        setDialog({ ...dialog, open: false })
+                    }}>
+                        Xác nhận
+                    </Button >
+                }
+                btnCancel={
+                    < Button variant="outlined"
+                        onClick={() => setDialog({ ...dialog, open: false })}
+                        style={{ color: "black", border: "1px solid #E5E7EB", }}
+                    >
+                        Trở lại
+                    </Button >
+                }
+            />
+
+        } else {
+            content = <DialogContent
+                icon={<p className="p-3 bg-red-100 w-fit rounded-full text-center"><IconPause /></p>}
+                title="Bật hoạt động cho chi nhánh"
+                content={<p>Bạn có chắc chắn muốn bật hoạt động cho chi nhánh <b>{data.name}</b> của <b>{data.hotel?.name ?? ""}</b> này không?</p>}
+                btnConfirm={
+                    <Button color="blue" variant="solid" onClick={() => {
+                        changeStatus(data)
+                        setDialog({ ...dialog, open: false })
+                    }}>
+                        Xác nhận
+                    </Button>
+                }
+                btnCancel={
+                    <Button variant="outlined"
+                        onClick={() => setDialog({ ...dialog, open: false })}
+                        style={{ color: "#374151", border: "1px solid #E5E7EB", }}
+                    >
+                        Trở lại
+                    </Button>
+                }
+            />
+        }
+
         setDialog({ ...dialog, open: true, content: content, title: "" })
     }
-
 
     const onSearch = (key: string) => {
 
@@ -117,9 +165,9 @@ const BranchManagment = () => {
                             onChange={(value: number) => { console.log(value) }}
                             options={reportFilter}
                         />
-                        <RangePicker />
 
-                        <Button type="primary" onClick={() => showModalCreate(new Branch())}>+ Tạo khách sạn</Button>
+
+                        <Button type="primary" onClick={() => showModalCreate(new Branch())}>+ Thêm chi nhánh</Button>
 
                     </div>
 
@@ -141,7 +189,6 @@ const BranchManagment = () => {
                 data={data}
                 loading={false}
                 onEdit={(value) => showModalCreate(value)}
-                onResetPWD={(value) => showResetPWDModal(value)}
                 onChangeStatus={(value) => showModalConfirm(value)}
                 onShowDetail={(value) => showDetailModal(value)}
             />

@@ -1,4 +1,5 @@
 import { STATUS } from "../../constants/enum";
+import { Branch } from "../branch/branch";
 
 
 export class Hotel {
@@ -15,7 +16,7 @@ export class Hotel {
     address: string = "";
     created_at: string = "";
     updated_at: string = "";
-    branch_number: number = 0;
+    branches: Branch[] = [];
 
     constructor(data?: Partial<Hotel>) {
         Object.assign(this, data);
@@ -24,7 +25,7 @@ export class Hotel {
 
 
 export class HotelStatistics {
-    total_record: number = 0;
+    total: number = 0;
     total_active: number = 0;
     total_inactive: number = 0;
 

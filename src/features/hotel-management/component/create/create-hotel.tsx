@@ -115,11 +115,11 @@ export const CreateHotel = (
 
                     <ExternalLabelTextField
                         label="Số điện thoại"
-                        name="phone_number"
+                        name="phone"
                         value={formik.values.phone}
                         error={formik.touched.phone && formik.errors.phone}
                         onChange={(value) => {
-                            formik.setFieldValue("phone_number", value)
+                            formik.setFieldValue("phone", value)
                         }}
                         required
                     />
