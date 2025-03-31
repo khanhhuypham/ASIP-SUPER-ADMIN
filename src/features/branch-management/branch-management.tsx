@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react"
 import { PopupInterface } from "../../constants/interface"
 import { Button, Input, Modal, Select, DatePicker, message } from "antd"
-import { Hotel } from "../../model/hotel/hotel"
 import { tab_filter_id } from "../../constants/tag-id"
 import { DialogContent } from "../../components/custom/dialog-content"
 import IconPause from "../../components/icons/icon-pause"
-
-import { TabBar } from "../../components/custom/tab-bar"
 import { reportFilter } from "../../constants/constant"
 import { Branch } from "../../model/branch/branch"
 import { BranchManagementTable } from "./component/branch-management-table"
@@ -49,7 +46,7 @@ const BranchManagment = () => {
         })
     }
 
-    const changeStatus = (branch:Branch) => {
+    const changeStatus = (branch: Branch) => {
 
         branchService.changeStatus(branch.id).then((res) => {
             if (res.status == 200) {
@@ -70,7 +67,7 @@ const BranchManagment = () => {
         let component = <CreateBranch data={data} onComplete={(_) => {
             getList()
             setDialog({ ...dialog, open: false })
-        }}/>;
+        }} />;
         setDialog({ ...dialog, open: true, content: component, title: data.id == 0 ? "Tạo khách sạn" : "Chỉnh sửa khách sạn" })
     }
 
@@ -148,24 +145,34 @@ const BranchManagment = () => {
             <div id={tab_filter_id} className="space-y-4">
 
                 <div className="flex justify-between">
-                    <Input
-                        placeholder="Tìm kiếm hạng phòng"
-                        className="w-64"
-                        prefix={<i className="fa-solid fa-magnifying-glass" />}
-                        allowClear
-                        onChange={(e) => onSearch(e.target.value)}
-                    />
-                    <div className="flex justify-end gap-3">
 
-                        <Select
-                            defaultValue={1}
-
-                            // optionFilterProp="label"
-                            className="w-[150px]"
-                            onChange={(value: number) => { console.log(value) }}
-                            options={reportFilter}
+                    <div className="space-x-2">
+                        <Input
+                            placeholder="Tìm kiếm hạng phòng"
+                            className="w-64"
+                            prefix={<i className="fa-solid fa-magnifying-glass" />}
+                            allowClear
+                            onChange={(e) => onSearch(e.target.value)}
                         />
+                        <Select
+                            // value={-1}
+                            className="w-[150px]"
+                            showSearch
+                            placeholder="Tên khách sạn"
+                            optionFilterProp="children"
+                            filterOption={(input, option) =>
+                                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                            }
+                            options={[
+                                { value: -1, label: "Tất cả" },
+                            ]}
+                            // onChange={(value) => onFilterChange?.(value)}
+                            dropdownStyle={{ maxHeight: 400 }}
+                            notFoundContent="Không tìm thấy khách sạn"
+                        />
+                    </div>
 
+                    <div className="flex justify-end ">
 
                         <Button type="primary" onClick={() => showModalCreate(new Branch())}>+ Thêm chi nhánh</Button>
 

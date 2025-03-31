@@ -121,7 +121,6 @@ export const CreateBranch = ({
                             if (hotel){
                                 formik.setFieldValue("hotel", value);
                             }
-
                         }}
                     />
 
