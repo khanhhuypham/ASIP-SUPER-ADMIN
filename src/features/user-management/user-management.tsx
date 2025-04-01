@@ -2,21 +2,30 @@ import { useEffect, useState } from "react"
 import { PopupInterface } from "../../constants/interface"
 import { User } from "../../model/user/user"
 import { userService } from "../../service/user-service/user-service"
-import { Tab } from "../../components/custom/tab-bar"
+import { Tab, TabBar } from "../../components/custom/tab-bar"
 import { STATUS } from "../../constants/enum"
 import { Button, Input, message, Modal, Select } from "antd"
 import { DialogContent } from "../../components/custom/dialog-content"
-import IconPause from "../../components/icons/icon-pause"
 import { tab_filter_id } from "../../constants/tag-id"
 import { UserManagementTable } from "./component/user-management-table"
 import { CreateUser } from "./component/create-user"
 import { UserDetail } from "./component/user-detail"
 import IconUnlock from "../../components/icons/icon-unclock"
+import {  ExternalLabelDebounceSelect } from "../../components/custom/field/external-label-debounce-select"
+import { OptionType } from "../../components/custom/field/debounce-select"
+import { hotelService } from "../../service/hotel-service/hotel-service"
+import { Hotel } from "../../model/hotel/hotel"
+import { branchService } from "../../service/branch-service/branch-service"
+import { Branch } from "../../model/branch/branch"
+import { HotelManagmentListProps } from "../hotel-management/hotel-management"
 
 export interface UserManagmentListProps {
     data?: User[]
-    loading?: boolean,
+    loading?: boolean
     key_search?: string
+    hotel_id?: number
+    branch_id?: number
+    currentTab?:STATUS
     page?: number
     limit?: number
     total_record?: number
@@ -38,14 +47,28 @@ const UserManagment = () => {
         { id: STATUS.INACTIVE, label: "Ngừng hoạt động", count: 0 },
     ])
 
+
     const [parameter, setParameter] = useState<UserManagmentListProps>({
         data: [],
         loading: false,
+        hotel_id:-1,
+        branch_id:-1,
+        currentTab:STATUS.ALL,
         page: 1,
         limit: 10,
         total_record: 0,
         key_search: "",
-    });
+    })
+
+    const [branchList, setBranchList] = useState<Branch[]>([])
+
+    const [hotelParam, setHotelParam] = useState<HotelManagmentListProps>({
+        data: [],
+        page: 1,
+        limit: 10,
+        key_search: "",
+    })
+
 
 
 
@@ -64,6 +87,30 @@ const UserManagment = () => {
         })
     }
 
+
+    const getHotelList = () => {
+
+        hotelService.list(hotelParam).then((res) => {
+            if (res.status == 200) {
+                setHotelParam({ ...hotelParam,data: res.data.list})
+            } else {
+                message.error(res.message)
+            }
+        })
+    }
+
+    const getBranchList = (hotelId: number) => {
+
+        branchService.getList(hotelId).then((res) => {
+            if (res.status == 200) {
+                setBranchList(res.data)
+            } else {
+                message.error(res.message)
+            }
+        })
+
+    }
+
     const changeStatus = (user: User) => {
 
         userService.changeStatus(user.id).then((res) => {
@@ -79,6 +126,14 @@ const UserManagment = () => {
         getList()
     }, []);
 
+    useEffect(() => {
+        getList()
+    }, [parameter.page,parameter.key_search,parameter.hotel_id,parameter.branch_id]);
+
+
+    useEffect(() => {
+        getHotelList()
+    }, [hotelParam.page,hotelParam.key_search]);
 
 
     const showModalCreate = (data: User) => {
@@ -138,36 +193,34 @@ const UserManagment = () => {
                             allowClear
                             onChange={(e) => onSearch(e.target.value)}
                         />
-                        <Select
-                            value={-1}
+
+                        <ExternalLabelDebounceSelect
+                            showSearch={true}
+                            options={[{ value: "-1", label: "Tất cả" }, ...(hotelParam.data ?? []).map((b) => ({ value: b.id.toString(), label: b.name }))]}
+                            placeholder="Select users"
+                            value={parameter.hotel_id !== undefined ? [parameter.hotel_id] : undefined}
+                            onSearch={(value) =>  setParameter({ ...parameter,key_search: value,page:1})}
+                            onScrollDown={(value: boolean) => console.log(value)}
+                            onChange={(newValue) => {
+                            
+                                if (!Array.isArray(newValue)) {
+                                    setParameter({ ...parameter, hotel_id: Number(newValue.value) });
+                                    getBranchList(Number(newValue.value))
+                                }
+                                
+                            }}
                             className="w-[150px]"
-                            showSearch
-                            placeholder="Tên khách sạn"
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                            }
-                            options={[
-                                { value: -1, label: "Tất cả" },
-                            ]}
-                            // onChange={(value) => onFilterChange?.(value)}
-                            dropdownStyle={{ maxHeight: 400 }}
-                            notFoundContent="Không tìm thấy khách sạn"
                         />
+                    
 
                         <Select
-                            value={-1}
+                            value={parameter.branch_id}
                             className="w-[150px]"
                             showSearch
                             placeholder="Tên chi nhánh"
                             optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                            }
-                            options={[
-                                { value: -1, label: "Tất cả" },
-                            ]}
-                            // onChange={(value) => onFilterChange?.(value)}
+                            options={[{ value: -1, label: "Tất cả" }, ...branchList.map((b) => ({ value: b.id, label: b.name }))]}
+                            onChange={(value) => setParameter({ ...parameter,branch_id:value})}
                             dropdownStyle={{ maxHeight: 400 }}
                             notFoundContent="Không tìm thấy khách sạn"
                         />
@@ -182,7 +235,7 @@ const UserManagment = () => {
 
                 </div>
 
-                {/* <TabBar currentTab={parameter.is_active ?? STATUS.ALL} tabs={tabs} onChange={(value) => onChangeStatus(value)} /> */}
+                <TabBar currentTab={parameter.currentTab ?? STATUS.ALL} tabs={tabs} onChange={(value) => setParameter({ ...parameter,currentTab:value,page:1})} />
             </div>
         )
     };

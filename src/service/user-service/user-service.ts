@@ -21,7 +21,8 @@ export const userService = {
                 {
                     params: {
                         // is_active: param.is_active,
-                  
+                        branch_id:param.branch_id,
+                        hotel_id:param.hotel_id,
                         limit: param.limit,
                         page: param.page,
                     },

@@ -83,15 +83,26 @@ export function DebounceSelect({
             options={options}
             value={value.map((item) => ({ label: item.label, value: item.value }))}
             onDropdownVisibleChange={handleDropdownVisibleChange} // Trigger fetch when dropdown opens
-            onChange={(newValue: OptionType | OptionType[]) => {
-                let updatedValues: OptionType[];
-                // Handle single-select mode
-                if (!Array.isArray(newValue)) {
-                    updatedValues = [newValue]; // Wrap single value in an array
-                } else {
-                    // Handle multi-select mode
-                    updatedValues = newValue;
+            onPopupScroll={(e: React.UIEvent<HTMLDivElement>) => {
+                const target = e.currentTarget;
+
+                if (target.scrollTop + target.clientHeight >= target.scrollHeight - 10) {
+                    console.log("Scrolled to the bottom!");
+                    // You can trigger an API call here to fetch more data
                 }
+            }}
+            onChange={(newValue: OptionType | OptionType[]) => {
+
+                let updatedValues: OptionType[];
+ 
+
+                if (Array.isArray(newValue)) {
+                    //Handle multi-select mode
+                    updatedValues = newValue;
+                } else {
+                    updatedValues = [newValue]; // Wrap single value in an array
+                }
+
 
                 // Transform the selected values into the desired format
                 const transformedValues = updatedValues.map((item) => ({
