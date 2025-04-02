@@ -2,7 +2,6 @@ import { useFormik } from "formik";
 
 import * as Yup from "yup";
 import { useEffect, useState } from "react";
-import { message } from "antd";
 import { Branch } from "../../../model/branch/branch";
 import { Hotel } from "../../../model/hotel/hotel";
 import { emailRegex, phoneRegExp } from "../../../constants/regex";
@@ -11,6 +10,7 @@ import ExternalLabelSelectField from "../../../components/custom/field/external-
 import { ExternalLabelTextField } from "../../../components/custom/field/external-label-textfield";
 import { ExternalLabelTextArea } from "../../../components/custom/field/external-label-textarea";
 import { branchService } from "../../../service/branch-service/branch-service";
+import { toast } from "react-toastify";
 
 
 
@@ -29,7 +29,6 @@ export const CreateBranch = ({
     const formik = useFormik({
         initialValues: new Branch(),
         validationSchema: Yup.object({
-
 
 
             name: Yup.string()
@@ -63,7 +62,7 @@ export const CreateBranch = ({
             if (res.status == 200) {
                 setHotelList(res.data.list)
             } else {
-                message.error(res.message)
+                toast.error(res.message)
             }
         })
     }
@@ -73,7 +72,7 @@ export const CreateBranch = ({
             if (res.status == 201) {
                 onComplete && onComplete(data);
             } else {
-                message.error(res.message)
+                toast.error(res.message)
             }
         })
     }
@@ -83,7 +82,7 @@ export const CreateBranch = ({
             if (res.status == 200) {
                 onComplete && onComplete(data);
             } else {
-                message.error(res.message)
+                toast.error(res.message)
             }
         })
     }
@@ -96,7 +95,7 @@ export const CreateBranch = ({
         } else {
             formik.setValues(data);
         }
-
+        console.log(data)
         getHotelList()
     }, [data]);
 
@@ -109,7 +108,7 @@ export const CreateBranch = ({
                     <ExternalLabelSelectField
                         label="Khách sạn"
                         name="hotel"
-                        selectedOptions={[formik.values.hotel.id]}
+                        selectedOptions={formik.values.hotel.id > 0 ? [formik.values.hotel.id] : undefined}
                         options={hotelList.map((hotel) => ({value:hotel.id,label:hotel.name}))}
                         showSearch={true}
                         required

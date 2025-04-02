@@ -74,16 +74,23 @@ export const UserManagementTable = ({
                 if (!a.code || !b.code) return 0;
                 return a.code.localeCompare(b.code, "vi");
             },
+            width: 150
         },
         {
             title: 'Tên nhân viên',
             dataIndex: 'name',
+            render: (_, data, index) => (
+                <div className="flex items-center gap-2">
+                    <Avatar size={25} src={data.avatar} />
+                    <p className="font-semibold">{data.name}</p>
+                </div>
+            ),
             sorter: (a: User, b: User) => {
                 if (!a.name || !b.name) return 0;
                 return a.name.localeCompare(b.name, "vi");
             },
         },
-      
+
         {
             title: 'Ngày vào làm',
             dataIndex: 'created_at',
@@ -117,7 +124,7 @@ export const UserManagementTable = ({
                     return <Tag color="red">Ngừng hoạt động</Tag>;
                 }
             },
-            width: 60
+
         },
         {
             dataIndex: '',
@@ -125,7 +132,7 @@ export const UserManagementTable = ({
             render: (i, data) => {
 
                 const items: MenuProps['items'] = [
-                  
+
                     {
                         label: "Đặt lại mật khẩu",
                         icon: <IconUnlock fill={false} className="w-5 h-5" />,
@@ -156,7 +163,7 @@ export const UserManagementTable = ({
                             case '2':
                                 onShowDetail && onShowDetail(data)
                                 break;
-                         
+
                             default:
                                 break;
                         }
@@ -177,7 +184,7 @@ export const UserManagementTable = ({
                 dataSource={data}
                 pagination={false}
                 loading={loading}
-                footer={() => <Pagination align="end" current={page} pageSize={10} onChange={onPageChange} total={total_record}  showTotal={showTotal}/>}
+                footer={() => <Pagination align="end" current={page} pageSize={10} onChange={onPageChange} total={total_record} showTotal={showTotal} />}
                 tableLayout="auto"
                 scroll={{
                     x: 1500,

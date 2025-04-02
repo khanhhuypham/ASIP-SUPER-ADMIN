@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { UserOutlined } from '@ant-design/icons';
 
 import { MenuInfo } from "rc-menu/lib/interface";
-import { BranchManagmentListProps } from "../branch-management";
+import { BranchListProps } from "../branch-management";
 import { tab_filter_id, tab_menu_id } from "../../../constants/tag-id";
 import { Branch } from "../../../model/branch/branch";
 import IconThreedots from "../../../components/icons/icon-three-dots";
@@ -21,11 +21,9 @@ export const BranchManagementTable = ({
     onEdit,
     onChangeStatus,
     onShowDetail
-}: BranchManagmentListProps) => {
+}: BranchListProps) => {
     const [tableMaxHeight, setTableMaxHeight] = useState(0);
     const tableRef = useRef<HTMLDivElement>(null);
-
-
 
 
     useEffect(() => {

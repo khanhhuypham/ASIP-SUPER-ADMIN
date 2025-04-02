@@ -5,6 +5,7 @@ import "./tailwind.css";
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
+// import { App as AntdApp } from 'antd';
 import store from './store';
 
 import { ExpiredProvider } from './state/expired-context';

@@ -103,7 +103,7 @@ const UserManagment = () => {
 
         branchService.getList(hotelId).then((res) => {
             if (res.status == 200) {
-                setBranchList(res.data)
+                setBranchList(res.data ?? [])
             } else {
                 message.error(res.message)
             }
@@ -122,13 +122,13 @@ const UserManagment = () => {
         })
     }
 
-    useEffect(() => {
-        getList()
-    }, []);
+
 
     useEffect(() => {
         getList()
     }, [parameter.page,parameter.key_search,parameter.hotel_id,parameter.branch_id]);
+
+    
 
 
     useEffect(() => {
@@ -173,8 +173,7 @@ const UserManagment = () => {
     }
 
     const onSearch = (key: string) => {
-
-
+        
     };
 
 
@@ -191,7 +190,10 @@ const UserManagment = () => {
                             className="w-64"
                             prefix={<i className="fa-solid fa-magnifying-glass" />}
                             allowClear
-                            onChange={(e) => onSearch(e.target.value)}
+                            onChange={(e) => {
+                                // const newValue = e.target.value;
+                                // getList({...parameter,key_search:newValue})
+                            }}
                         />
 
                         <ExternalLabelDebounceSelect
@@ -199,7 +201,7 @@ const UserManagment = () => {
                             options={[{ value: "-1", label: "Tất cả" }, ...(hotelParam.data ?? []).map((b) => ({ value: b.id.toString(), label: b.name }))]}
                             placeholder="Select users"
                             value={parameter.hotel_id !== undefined ? [parameter.hotel_id] : undefined}
-                            onSearch={(value) =>  setParameter({ ...parameter,key_search: value,page:1})}
+                            onSearch={(value) =>  setHotelParam({ ...hotelParam,key_search: value,page:1})}
                             onScrollDown={(value: boolean) => console.log(value)}
                             onChange={(newValue) => {
                             
@@ -228,9 +230,7 @@ const UserManagment = () => {
                     </div>
 
                     <div className="flex justify-end gap-3">
-
                         <Button type="primary" onClick={() => showModalCreate(new User())}>+ Thêm nhân viên</Button>
-
                     </div>
 
                 </div>

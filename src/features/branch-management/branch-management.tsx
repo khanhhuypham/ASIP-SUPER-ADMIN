@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react"
 import { PopupInterface } from "../../constants/interface"
-import { Button, Input, Modal, Select, DatePicker, message } from "antd"
-import { tab_filter_id } from "../../constants/tag-id"
+import { Button, Modal, DatePicker, message } from "antd"
 import { DialogContent } from "../../components/custom/dialog-content"
 import IconPause from "../../components/icons/icon-pause"
-import { reportFilter } from "../../constants/constant"
 import { Branch } from "../../model/branch/branch"
 import { BranchManagementTable } from "./component/branch-management-table"
 
@@ -13,62 +11,100 @@ import { CreateBranch } from "./component/create-branch"
 import { branchService } from "../../service/branch-service/branch-service"
 import { BranchDetail } from "./component/branch-info/branch-detail"
 
+import { STATUS } from "../../constants/enum"
+import { Header } from "./component/branch-management-header"
+import { toast } from "react-toastify"
+
 const { RangePicker } = DatePicker;
 
-export interface BranchManagmentListProps {
+export interface BranchListProps {
     data: Branch[]
     loading: boolean
     search_key?: string
+    hotel_id?: number
+    active?: STATUS
     onEdit?: ((arg0: Branch) => void)
     onChangeStatus?: ((arg0: Branch) => void)
     onShowDetail?: ((arg0: Branch) => void)
 }
 
-
-
 const BranchManagment = () => {
 
     const [dialog, setDialog] = useState<PopupInterface>({ open: false, content: undefined, title: "" });
-    const [data, setData] = useState<Branch[]>([])
+
+    const [parameter, setParameter] = useState<BranchListProps>({
+        data: [],
+        loading: false,
+        search_key: "",
+    })
+
     const [fullData, setFullData] = useState<Branch[]>([])
 
 
+    const getList = (p: BranchListProps) => {
+        let data: Branch[] = []
+        const hotel_id = p.hotel_id == -1 ? undefined : p.hotel_id
 
-    const getList = () => {
+        branchService.getList(hotel_id, p.search_key).then((res) => {
 
-        branchService.getList(1).then((res) => {
             if (res.status == 200) {
-                setData(res.data);
-                setFullData(res.data)
+                data = res.data ?? []
             } else {
-                message.error(res.message)
+                toast.error(res.message)
             }
+
+            setParameter({ ...p, data: data, loading: false })
+            setFullData(data)
         })
     }
+
 
     const changeStatus = (branch: Branch) => {
 
         branchService.changeStatus(branch.id).then((res) => {
             if (res.status == 200) {
-                getList()
+                toast.success("Cập nhật trạng thái thành công")
+                getList(parameter)
             } else {
-                message.error(res.message)
+                toast.error(res.message)
             }
         })
     }
 
-    useEffect(() => {
-        getList()
-    }, []);
 
+
+    useEffect(() => {
+        setParameter({ ...parameter, loading: true })
+        getList(parameter)
+    }, [parameter.hotel_id, parameter.search_key]);
+
+
+
+
+
+    useEffect(() => {
+        switch (parameter.active) {
+            case STATUS.ALL:
+                setParameter({ ...parameter, data: fullData })
+                break
+
+            case STATUS.ACTIVE:
+                setParameter({ ...parameter, data: fullData.filter((data) => data.active) })
+                break
+
+            case STATUS.INACTIVE:
+                setParameter({ ...parameter, data: fullData.filter((data) => !data.active) })
+                break
+        }
+    }, [parameter.active]);
 
 
     const showModalCreate = (data: Branch) => {
         let component = <CreateBranch data={data} onComplete={(_) => {
-            getList()
+            getList(parameter)
             setDialog({ ...dialog, open: false })
         }} />;
-        setDialog({ ...dialog, open: true, content: component, title: data.id == 0 ? "Tạo khách sạn" : "Chỉnh sửa khách sạn" })
+        setDialog({ ...dialog, open: true, content: component, title: data.id == 0 ? "Tạo chi nhánh" : "Chỉnh sửa chi nhánh" })
     }
 
 
@@ -133,75 +169,22 @@ const BranchManagment = () => {
         setDialog({ ...dialog, open: true, content: content, title: "" })
     }
 
-    const onSearch = (key: string) => {
-
-
-    };
-
-
-
-    const Header = () => {
-        return (
-            <div id={tab_filter_id} className="space-y-4">
-
-                <div className="flex justify-between">
-
-                    <div className="space-x-2">
-                        <Input
-                            placeholder="Tìm kiếm hạng phòng"
-                            className="w-64"
-                            prefix={<i className="fa-solid fa-magnifying-glass" />}
-                            allowClear
-                            onChange={(e) => onSearch(e.target.value)}
-                        />
-                        <Select
-                            // value={-1}
-                            className="w-[150px]"
-                            showSearch
-                            placeholder="Tên khách sạn"
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                            }
-                            options={[
-                                { value: -1, label: "Tất cả" },
-                            ]}
-                            // onChange={(value) => onFilterChange?.(value)}
-                            dropdownStyle={{ maxHeight: 400 }}
-                            notFoundContent="Không tìm thấy khách sạn"
-                        />
-                    </div>
-
-                    <div className="flex justify-end ">
-
-                        <Button type="primary" onClick={() => showModalCreate(new Branch())}>+ Thêm chi nhánh</Button>
-
-                    </div>
-
-                </div>
-
-                {/* <TabBar tabs={tabs} onChange={(value) => {
-
-                }} /> */}
-            </div>
-        )
-    };
 
 
     return (
         <div className="panel space-y-6">
 
-            <Header />
+            <Header data={parameter} fullData={fullData} onCreate={() => showModalCreate(new Branch())} onSetData={(data) => setParameter(data)} />
+
             <BranchManagementTable
-                data={data}
-                loading={false}
+                data={parameter.data}
+                loading={parameter.loading}
                 onEdit={(value) => showModalCreate(value)}
                 onChangeStatus={(value) => showModalConfirm(value)}
                 onShowDetail={(value) => showDetailModal(value)}
             />
 
             <Modal
-                // width={750}
                 title={dialog.title}
                 centered
                 open={dialog.open}
