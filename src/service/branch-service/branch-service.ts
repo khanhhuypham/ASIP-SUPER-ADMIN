@@ -1,3 +1,5 @@
+
+import axios from "axios";
 import { Branch } from "../../model/branch/branch";
 import { BaseResponse } from "../base-response";
 import axiosClient, { ProjectId, VERSION } from "../configURL";
@@ -6,17 +8,21 @@ import axiosClient, { ProjectId, VERSION } from "../configURL";
 
 
 export const branchService = {
-    getList: async (companyId: number) => {
+    getList: async (hotel_id?:number,search_key?:string) => {
         const apiClient = axiosClient(ProjectId);
         try {
             const response = await apiClient.get<BaseResponse<Branch[]>>(`${VERSION}/branch`,{
                 params: {
-                    company_id: companyId,
+                    hotel_id: hotel_id,
+                    search_key:search_key
                 },
             });
             return response?.data;
         } catch (error) {
-            console.error(error);
+            if (axios.isAxiosError(error) && error.response) {
+                return error.response.data as BaseResponse<undefined>;
+            }
+
             throw error;
         }
     },
@@ -28,7 +34,10 @@ export const branchService = {
             const response = await apiClient.get<BaseResponse<undefined>>(`${VERSION}/branch/${branchId}/change-status`);
             return response?.data;
         } catch (error) {
-            console.error(error);
+            if (axios.isAxiosError(error) && error.response) {
+                return error.response.data as BaseResponse<undefined>;
+            }
+
             throw error;
         }
     },
@@ -49,7 +58,11 @@ export const branchService = {
             );
             return response?.data;
         } catch (error) {
-            console.error(error);
+    
+            if (axios.isAxiosError(error) && error.response) {
+                return error.response.data as BaseResponse<undefined>;
+            }
+
             throw error;
         }
     },
@@ -69,7 +82,10 @@ export const branchService = {
 
             return response?.data;
         } catch (error) {
-            console.error(error);
+            if (axios.isAxiosError(error) && error.response) {
+                return error.response.data as BaseResponse<undefined>;
+            }
+
             throw error;
         }
     },

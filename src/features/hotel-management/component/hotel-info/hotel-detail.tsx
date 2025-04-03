@@ -24,18 +24,6 @@ export const HotelDetail = ({ input }: { input: Hotel }) => {
 
 
 
-    const getDetail = (id: number) => {
-        hotelService.getDetail(id).then((res) => {
-
-            if (res.status == 200) {
-                setData(res.data)
-            } else {
-                message.error(res.message)
-            }
-
-        })
-    }
-
 
     const getBranchList = (id: number) => {
         // AxiosBranchManagementService.getList(id).then((res) => {

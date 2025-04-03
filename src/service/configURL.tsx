@@ -59,9 +59,9 @@ const axiosClient = (port: number | null = null): AxiosInstance => {
             try {
                 const { response } = error;
 
-                if (response?.status === 401) {
-                    window.location.href = ROUTE_LINK.LOGIN;
-                }
+                // if (response?.status === 401) {
+                //     window.location.href = ROUTE_LINK.LOGIN;
+                // }
                 console.error(error);
             } catch (e) {
                 console.error(e);
