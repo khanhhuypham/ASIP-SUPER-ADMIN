@@ -35,6 +35,7 @@ const BranchManagment = () => {
     const [parameter, setParameter] = useState<BranchListProps>({
         data: [],
         loading: false,
+        hotel_id:-1,
         search_key: "",
     })
 
@@ -53,7 +54,7 @@ const BranchManagment = () => {
                 toast.error(res.message)
             }
 
-            setParameter({ ...p, data: data, loading: false })
+            setParameter({...parameter, data: filterData(data), loading: false})
             setFullData(data)
         })
     }
@@ -78,26 +79,27 @@ const BranchManagment = () => {
         getList(parameter)
     }, [parameter.hotel_id, parameter.search_key]);
 
-
-
-
-
     useEffect(() => {
-        switch (parameter.active) {
-            case STATUS.ALL:
-                setParameter({ ...parameter, data: fullData })
-                break
-
-            case STATUS.ACTIVE:
-                setParameter({ ...parameter, data: fullData.filter((data) => data.active) })
-                break
-
-            case STATUS.INACTIVE:
-                setParameter({ ...parameter, data: fullData.filter((data) => !data.active) })
-                break
-        }
+        setParameter({...parameter, data: filterData(fullData)})
     }, [parameter.active]);
 
+
+    const filterData = (fullData: Branch[]): Branch[] => {
+  
+        switch (parameter.active) {
+            case STATUS.ALL:
+                return fullData;
+                
+            case STATUS.ACTIVE:
+                return fullData.filter((data) => data.active);
+                
+            case STATUS.INACTIVE:
+                return fullData.filter((data) => !data.active);
+                
+            default:
+                return []; // Return an empty array as a fallback
+        }
+    }
 
     const showModalCreate = (data: Branch) => {
         let component = <CreateBranch data={data} onComplete={(_) => {
