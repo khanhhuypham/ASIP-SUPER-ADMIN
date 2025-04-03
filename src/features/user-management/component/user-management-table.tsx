@@ -9,6 +9,9 @@ import IconUnlock from "../../../components/icons/icon-unclock";
 import IconPencil from "../../../components/icons/icon-pencil";
 import IconEye from "../../../components/icons/icon-eye";
 import { User } from "../../../model/user/user";
+import { on } from "events";
+import IconPlayCircle from "../../../components/icons/icon-play-circle";
+import IconPauseCircle from "../../../components/icons/icon-pause-circle";
 
 
 export const UserManagementTable = ({
@@ -17,6 +20,7 @@ export const UserManagementTable = ({
     page,
     total_record,
     onPageChange,
+    onChangeStatus,
     onEdit,
     onResetPWD,
     onShowDetail
@@ -132,21 +136,25 @@ export const UserManagementTable = ({
             render: (i, data) => {
 
                 const items: MenuProps['items'] = [
-
+                    {
+                        label: data.active ? "Tạm ngưng" : "Bật hoạt động",
+                        icon: data.active ? <IconPauseCircle className="w-5 h-5" /> : <IconPlayCircle className="w-5 h-5" />,
+                        key: '0',
+                    },
                     {
                         label: "Đặt lại mật khẩu",
                         icon: <IconUnlock fill={false} className="w-5 h-5" />,
-                        key: '0',
+                        key: '1',
                     },
                     {
                         label: "Chỉnh sửa",
                         icon: <IconPencil className="w-5 h-5" />,
-                        key: '1',
+                        key: '2',
                     },
                     {
                         label: "Xem chi tiết",
                         icon: <IconEye className="w-5 h-5" />,
-                        key: '2',
+                        key: '3',
                     },
                 ];
 
@@ -154,16 +162,18 @@ export const UserManagementTable = ({
                     items, onClick: (e: MenuInfo) => {
                         switch (e.key) {
                             case '0':
+                                // Call the onEdit function passed as a prop
+                                onChangeStatus && onChangeStatus(data);
+                                break;
+                            case '1':
                                 onResetPWD && onResetPWD(data)
                                 break;
-
-                            case '1':
-                                break;
-
                             case '2':
-                                onShowDetail && onShowDetail(data)
+                                onEdit && onEdit(data);
                                 break;
-
+                            case '3':
+                                onShowDetail && onShowDetail(data); // Call the onShowDetail function passed as a prop
+                                break;
                             default:
                                 break;
                         }

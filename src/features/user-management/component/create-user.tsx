@@ -7,6 +7,7 @@ import { ExternalLabelTextField } from "../../../components/custom/field/externa
 import ExternalLabelSelectField from "../../../components/custom/field/external-label-select-field";
 import { userService } from "../../../service/user-service/user-service";
 import { message } from "antd";
+import { toast } from "react-toastify";
 
 
 
@@ -47,9 +48,9 @@ export const CreateUser = (
         userService.create(data).then((res) => {
             if (res.status == 200) {
                 onComplete && onComplete()
-                message.success("Thêm mới thành công");
+                toast.success("Thêm mới thành công");
             } else {
-                message.error(res.message);
+                toast.error(res.message);
             }
         })
     }
@@ -58,9 +59,9 @@ export const CreateUser = (
         userService.update(data).then((res) => {
             if (res.status == 200) {
                 onComplete && onComplete()
-                message.success("Thêm mới thành công");
+                toast.success("Cập nhật thành công");
             } else {
-                message.error(res.message);
+                toast.error(res.message);
             }
         })
     }
