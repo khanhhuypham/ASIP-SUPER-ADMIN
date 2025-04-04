@@ -18,7 +18,7 @@ export const hotelService = {
                 {
                     params: {
                         is_active: param.is_active,
-                        key_search: param.key_search,
+                        key_search: param.search_key,
                         from_date: param.from_date,
                         to_date: param.to_date,
                         limit: param.limit,
@@ -46,7 +46,7 @@ export const hotelService = {
             const response = await apiClient.get<BaseResponse<HotelStatistics>>(`${VERSION}/company/count-tab`,
                 {
                     params: {
-                        key_search: param.key_search,
+                        key_search: param.search_key,
                         from_date: param.from_date,
                         to_date: param.to_date,
                     },

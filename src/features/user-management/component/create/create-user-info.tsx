@@ -5,19 +5,21 @@ import { useEffect, useState } from "react";
 import { User } from "../../../../model/user/user";
 import { ExternalLabelTextField } from "../../../../components/custom/field/external-label-textfield";
 import ExternalLabelSelectField from "../../../../components/custom/field/external-label-select-field";
-import { userService } from "../../../../service/user-service/user-service";
-import { message } from "antd";
 import { toast } from "react-toastify";
 import { Branch } from "../../../../model/branch/branch";
 import { HotelManagmentListProps } from "../../../hotel-management/hotel-management";
 import { hotelService } from "../../../../service/hotel-service/hotel-service";
 import { branchService } from "../../../../service/branch-service/branch-service";
+import { SelectWithApi } from "../../../../components/custom/field/select-with-api";
+import ExternalLabelSelectWithAPI from "../../../../components/custom/field/external-label-select-with-api";
 
 
+
+let timeout: ReturnType<typeof setTimeout> | null;
 
 export const CreateUserInfo = (
     { data, onComplete, onCancel }:
-        { data: User, onComplete?: ((agr0: User) => void), onCancel?: (() => void) }
+    { data: User, onComplete?: ((agr0: User) => void), onCancel?: (() => void) }
 ) => {
     const [randomNumber, setRandomNumber] = useState<number>(0)
 
@@ -27,7 +29,7 @@ export const CreateUserInfo = (
         data: [],
         page: 1,
         limit: 10,
-        key_search: "",
+        search_key: "",
     })
 
     const formik = useFormik({
@@ -59,38 +61,28 @@ export const CreateUserInfo = (
     });
 
 
-    // const create = (data: User) => {
-    //     userService.create(data).then((res) => {
-    //         if (res.status == 200) {
-    //             // onComplete && onComplete()
-    //             toast.success("Thêm mới thành công");
-    //         } else {
-    //             toast.error(res.message);
-    //         }
-    //     })
-    // }
 
-    // const update = (data: User) => {
-    //     userService.update(data).then((res) => {
-    //         if (res.status == 200) {
-    //             // onComplete && onComplete()
-    //             toast.success("Cập nhật thành công");
-    //         } else {
-    //             toast.error(res.message);
-    //         }
-    //     })
-    // }
 
-    const getHotelList = (p: HotelManagmentListProps) => {
+    const getHotelList = (value: string, callback: (data: { value: string; label: string }[]) => void) => {
+    
+        if (timeout) {
+            clearTimeout(timeout);
+            timeout = null;
+        }
+    
+        const fetch = () => {
+    
+            hotelService.list({ search_key:value,page: 1, limit: 10 }).then((res) => {
+                if (res.status == 200) {
+                    callback((res.data.list ?? []).map((hotel) => ({ value: hotel.id.toString(), label: hotel.name })));
+                } else {
+                    toast.error(res.message)
+                }
+            })
+        }
+        timeout = setTimeout(fetch, 300);
 
-        hotelService.list(p).then((res) => {
-            if (res.status == 200) {
-                setHotelParam({ ...p, data: res.data.list })
-            } else {
-                toast.error(res.message)
-            }
-        })
-    }
+    };
 
     const getBranchList = (hotelId: number) => {
 
@@ -127,7 +119,7 @@ export const CreateUserInfo = (
             formik.setValues(data)
         }
 
-        getHotelList(hotelParam)
+        // getHotelList(hotelParam)
         getBranchList(1)
 
     }, [data])
@@ -193,25 +185,19 @@ export const CreateUserInfo = (
                     />
 
 
-                    <ExternalLabelSelectField
+                    <ExternalLabelSelectWithAPI
+                        fetchData={getHotelList}
                         label="Khách sạn"
                         name="hotel"
-                        // selectedOptions={[formik.values.hotel.id]}
-        
-                        options={(hotelParam.data ?? []).map((hotel) => ({ value: hotel.id, label: hotel.name }))}
                         showSearch={true}
                         required
                         placeholder="Vui lòng chọn khách sạn"
                         onChange={(value) => {
 
-                            // const hotel = hotelList.find((h) => h.id == value)
-
-                            // if (hotel) {
-                            //     formik.setFieldValue("hotel", value);
-                            // }
-
+                    
                         }}
                     />
+
 
                     <ExternalLabelSelectField
                         label="Chi nhánh"
@@ -231,6 +217,9 @@ export const CreateUserInfo = (
 
                         }}
                     />
+
+
+                    {/* <SelectWithApi placeholder="input search text" style={{ width: 200 }} /> */}
 
 
                     <div className='flex justify-end gap-2'>

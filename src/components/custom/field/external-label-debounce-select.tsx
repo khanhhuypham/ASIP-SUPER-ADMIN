@@ -40,7 +40,6 @@ export function ExternalLabelDebounceSelect({
     const fetchRef = useRef(0);
 
 
-
     const debouncedSearch = useMemo(() => {
         const handleSearch = (searchValue: string) => {
             fetchRef.current += 1;

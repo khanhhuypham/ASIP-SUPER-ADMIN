@@ -41,6 +41,28 @@ export const CreateUserForm = ({ data, onComplete, onCancel }: { data: User, onC
        
     }
 
+        // const update = (data: User) => {
+    //     userService.update(data).then((res) => {
+    //         if (res.status == 200) {
+    //             // onComplete && onComplete()
+    //             toast.success("Cập nhật thành công");
+    //         } else {
+    //             toast.error(res.message);
+    //         }
+    //     })
+    // }
+
+    // const getHotelList = (p: HotelManagmentListProps) => {
+
+    //     hotelService.list(p).then((res) => {
+    //         if (res.status == 200) {
+    //             setHotelParam({ ...p, data: res.data.list })
+    //         } else {
+    //             toast.error(res.message)
+    //         }
+    //     })
+    // }
+
 
     const updateTourStep = (newActiveId: number) => {
 

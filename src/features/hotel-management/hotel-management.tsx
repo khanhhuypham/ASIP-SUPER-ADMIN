@@ -24,7 +24,7 @@ const { RangePicker } = DatePicker;
 export interface HotelManagmentListProps {
     data?: Hotel[]
     loading?: boolean,
-    key_search?: string
+    search_key?: string
     is_active?: STATUS
     from_date?: string
     to_date?: string
@@ -60,14 +60,14 @@ const HotelManagment = () => {
         page: 1,
         limit: 10,
         total_record: 0,
-        key_search: "",
+        search_key: "",
     });
-    const [searchInput, setSearchInput] = useState(parameter.key_search || "");
+    const [searchInput, setSearchInput] = useState(parameter.search_key || "");
 
 
     useEffect(() => {
         getHotelList(parameter);
-    }, [parameter.is_active, parameter.key_search, parameter.from_date, parameter.to_date, parameter.page]);
+    }, [parameter.is_active, parameter.search_key, parameter.from_date, parameter.to_date, parameter.page]);
 
 
     useEffect(() => {

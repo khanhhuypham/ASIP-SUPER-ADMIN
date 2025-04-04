@@ -11,26 +11,29 @@ interface SelectOptionProps {
     options?: SelectOptionProps[];
 }
 
-interface SelectFieldProps {
+
+interface SelectWithApiProps {
     label: string;
     name: string;
     placeholder?: string;
-    selectedOptions?: string[] | number[];
-    options: SelectOptionProps[];
+  
+    fetchData: (value: string, callback: (data: { value: string; label: string }[]) => void) => void;
     onChange?: (arg0: string[] | string | number[] | number) => void;
     required?: boolean;
-    mode?: SelectMode; // Removed 'default' from the type
+    mode?: SelectMode;
     error?: string,
     allowClear?: boolean,
     showSearch?: boolean
 }
 
-export const ExternalLabelSelectField: React.FC<SelectFieldProps> = ({
+
+export const ExternalLabelSelectWithAPI: React.FC<SelectWithApiProps> = ({
     label,
     name,
     placeholder,
-    selectedOptions,
-    options = [],
+    // selectedOptions,
+
+    fetchData,
     onChange,
     required = false,
     mode, // Now mode can only be 'multiple', 'tags', or undefined
@@ -39,22 +42,16 @@ export const ExternalLabelSelectField: React.FC<SelectFieldProps> = ({
     showSearch
 }) => {
 
+    const [data, setData] = useState<SelectOptionProps[]>([]);
+    const [value, setValue] = useState<string>();
 
-    const [defaultOptions, setDefaultOptions] = useState<string[] | number[] | null | undefined>(undefined);
+    const handleSearch = (newValue: string) => {
+        fetchData(newValue, setData);
+    };
 
-
-    useEffect(() => {
-
-        if (selectedOptions && selectedOptions.length > 0) {
-            console.log(selectedOptions)
-            setDefaultOptions(selectedOptions);
-        } else {
-            setDefaultOptions(undefined);
-        }
-
-    }, [selectedOptions]);
-
-
+    const handleChange = (newValue: string) => {
+        setValue(newValue);
+    };
 
     return (
 
@@ -63,7 +60,7 @@ export const ExternalLabelSelectField: React.FC<SelectFieldProps> = ({
 
             <div className="flex items-start h-full w-full">
 
-            <label htmlFor={name} className="w-[120px] shrink-0">
+                <label htmlFor={name} className="w-[120px] shrink-0">
                     {label}
                     {required && <span className="text-red-500"> (*)</span>}
                 </label>
@@ -73,23 +70,28 @@ export const ExternalLabelSelectField: React.FC<SelectFieldProps> = ({
                     <Select
                         showSearch={showSearch}
                         allowClear={allowClear}
+                        mode={mode === undefined ? undefined : mode} // Handle 'default' case
+                        value={value}
+                        placeholder={placeholder}
                         style={{
                             width: "100%",
                             outline: "none",
                         }}
-                        id={name}
-                        
-                       
                         className="disabled:bg-gray-100 h-[35px] border rounded-md outline-none "
-                        placeholder={placeholder}
                         variant="borderless"
-                        value={defaultOptions}
-                
-                        onChange={(value) => {
-                            onChange && onChange(value == undefined ? "" : value);
+                        defaultActiveFirstOption={false}
+                        filterOption={false}
+                        onSearch={handleSearch}
+                        onChange={handleChange}
+                        onPopupScroll={(e: React.UIEvent<HTMLDivElement>) => {
+                            const target = e.currentTarget;
+
+                            if (target.scrollTop + target.clientHeight >= target.scrollHeight - 10) {
+                                console.log("Scrolled to the bottom!");
+                            }
                         }}
-                        options={options}
-               
+                        notFoundContent={null}
+                        options={(data || []).map((d) => ({value: d.value,label: d.label}))}
                     />
                     {error ? <div className="mt-1 text-xs text-red-500">{error}</div> : null}
                 </div>
@@ -101,5 +103,4 @@ export const ExternalLabelSelectField: React.FC<SelectFieldProps> = ({
     );
 };
 
-export default ExternalLabelSelectField;
-
+export default ExternalLabelSelectWithAPI;

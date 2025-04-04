@@ -25,7 +25,7 @@ export const Header = (
         data: [],
         page: 1,
         limit: 10,
-        key_search: "",
+        search_key: "",
     })
     const [searchInput, setSearchInput] = useState("");
 
@@ -84,7 +84,7 @@ export const Header = (
                         options={[{ value: "-1", label: "Tất cả" }, ...(hotelParam.data ?? []).map((b) => ({ value: b.id.toString(), label: b.name }))]}
                         placeholder="Select users"
                         value={data.hotel_id !== undefined ? [data.hotel_id] : undefined}
-                        onSearch={(value) => setHotelParam({ ...hotelParam, key_search: value, page: 1 })}
+                        onSearch={(value) => setHotelParam({ ...hotelParam, search_key: value, page: 1 })}
                         onScrollDown={(value: boolean) => console.log(value)}
                         onChange={(newValue) => {
                             if (!Array.isArray(newValue)) {
