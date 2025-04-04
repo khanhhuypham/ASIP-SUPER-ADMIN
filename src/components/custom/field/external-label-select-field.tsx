@@ -84,7 +84,6 @@ export const ExternalLabelSelectField: React.FC<SelectFieldProps> = ({
                         variant="borderless"
                         value={defaultOptions}
                         onChange={(value) => {
-               
                             onChange && onChange(value == undefined ? "" : value);
                         }}
                         options={options}

@@ -18,6 +18,7 @@ export const UserManagementTable = ({
     data,
     loading,
     page,
+    limit,
     total_record,
     onPageChange,
     onChangeStatus,
@@ -185,7 +186,12 @@ export const UserManagementTable = ({
         },
     ];
 
-    const showTotal: PaginationProps['showTotal'] = (total) => `Total ${total} items`;
+    const showTotal: PaginationProps['showTotal'] = (total) => `Tổng:  ${total} nhân viên`;
+
+
+
+
+
     return (
         <div ref={tableRef}>
             <Table<User>
@@ -194,7 +200,17 @@ export const UserManagementTable = ({
                 dataSource={data}
                 pagination={false}
                 loading={loading}
-                footer={() => <Pagination align="end" current={page} pageSize={10} onChange={onPageChange} total={total_record} showTotal={showTotal} />}
+                footer={() => (
+                    <Pagination
+                        align="end"
+                        current={page}
+                        showSizeChanger pageSize={limit}
+                        onChange={(page, pageSize) => {
+                            console.log(page, pageSize);
+                            onPageChange && onPageChange(pageSize,page);
+                        }} total={total_record} showTotal={showTotal}
+                    />
+                )}
                 tableLayout="auto"
                 scroll={{
                     x: 1500,

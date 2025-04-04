@@ -2,20 +2,33 @@ import { useFormik } from "formik";
 
 import * as Yup from "yup";
 import { useEffect, useState } from "react";
-import { User } from "../../../model/user/user";
-import { ExternalLabelTextField } from "../../../components/custom/field/external-label-textfield";
-import ExternalLabelSelectField from "../../../components/custom/field/external-label-select-field";
-import { userService } from "../../../service/user-service/user-service";
+import { User } from "../../../../model/user/user";
+import { ExternalLabelTextField } from "../../../../components/custom/field/external-label-textfield";
+import ExternalLabelSelectField from "../../../../components/custom/field/external-label-select-field";
+import { userService } from "../../../../service/user-service/user-service";
 import { message } from "antd";
 import { toast } from "react-toastify";
+import { Branch } from "../../../../model/branch/branch";
+import { HotelManagmentListProps } from "../../../hotel-management/hotel-management";
+import { hotelService } from "../../../../service/hotel-service/hotel-service";
+import { branchService } from "../../../../service/branch-service/branch-service";
 
 
 
-export const CreateUser = (
-    { data, onComplete }:
-        { data: User, onComplete?: (() => void) }
+export const CreateUserInfo = (
+    { data, onComplete, onCancel }:
+        { data: User, onComplete?: ((agr0: User) => void), onCancel?: (() => void) }
 ) => {
     const [randomNumber, setRandomNumber] = useState<number>(0)
+
+    const [branchList, setBranchList] = useState<Branch[]>([])
+
+    const [hotelParam, setHotelParam] = useState<HotelManagmentListProps>({
+        data: [],
+        page: 1,
+        limit: 10,
+        key_search: "",
+    })
 
     const formik = useFormik({
         initialValues: new User(),
@@ -35,35 +48,60 @@ export const CreateUser = (
 
         }),
         onSubmit: (values) => {
-      
-            data.id == 0
-            ? create(values)
-            : update(values)
+
+            onComplete && onComplete({ ...values })
+
+            // data.id == 0
+            //     ? onComplete && onComplete({ ...values })
+            //     : update(values)
 
         },
     });
 
 
-    const create = (data: User) => {
-        userService.create(data).then((res) => {
+    // const create = (data: User) => {
+    //     userService.create(data).then((res) => {
+    //         if (res.status == 200) {
+    //             // onComplete && onComplete()
+    //             toast.success("Thêm mới thành công");
+    //         } else {
+    //             toast.error(res.message);
+    //         }
+    //     })
+    // }
+
+    // const update = (data: User) => {
+    //     userService.update(data).then((res) => {
+    //         if (res.status == 200) {
+    //             // onComplete && onComplete()
+    //             toast.success("Cập nhật thành công");
+    //         } else {
+    //             toast.error(res.message);
+    //         }
+    //     })
+    // }
+
+    const getHotelList = (p: HotelManagmentListProps) => {
+
+        hotelService.list(p).then((res) => {
             if (res.status == 200) {
-                onComplete && onComplete()
-                toast.success("Thêm mới thành công");
+                setHotelParam({ ...p, data: res.data.list })
             } else {
-                toast.error(res.message);
+                toast.error(res.message)
             }
         })
     }
 
-    const update = (data: User) => {
-        userService.update(data).then((res) => {
+    const getBranchList = (hotelId: number) => {
+
+        branchService.getList(hotelId).then((res) => {
             if (res.status == 200) {
-                onComplete && onComplete()
-                toast.success("Cập nhật thành công");
+                setBranchList(res.data ?? [])
             } else {
-                toast.error(res.message);
+                toast.error(res.message)
             }
         })
+
     }
 
 
@@ -89,6 +127,9 @@ export const CreateUser = (
             formik.setValues(data)
         }
 
+        getHotelList(hotelParam)
+        getBranchList(1)
+
     }, [data])
 
     useEffect(() => {
@@ -101,7 +142,7 @@ export const CreateUser = (
 
     return (
         <div className="space-y-6 ">
-            
+
 
             <form className='flex gap-5' onSubmit={formik.handleSubmit}>
 
@@ -152,49 +193,58 @@ export const CreateUser = (
                     />
 
 
-                    {/* <ExternalLabelSelectField
+                    <ExternalLabelSelectField
                         label="Khách sạn"
                         name="hotel"
-                        selectedOptions={[formik.values.hotel.id]}
-                        options={hotelList.map((hotel) => ({ value: hotel.id, label: hotel.name }))}
+                        // selectedOptions={[formik.values.hotel.id]}
+        
+                        options={(hotelParam.data ?? []).map((hotel) => ({ value: hotel.id, label: hotel.name }))}
                         showSearch={true}
                         required
                         placeholder="Vui lòng chọn khách sạn"
                         onChange={(value) => {
 
-                            const hotel = hotelList.find((h) => h.id == value)
+                            // const hotel = hotelList.find((h) => h.id == value)
 
-                            if (hotel) {
-                                formik.setFieldValue("hotel", value);
-                            }
+                            // if (hotel) {
+                            //     formik.setFieldValue("hotel", value);
+                            // }
 
                         }}
                     />
 
                     <ExternalLabelSelectField
-                        label="Khách sạn"
+                        label="Chi nhánh"
                         name="hotel"
-                        selectedOptions={[formik.values.hotel.id]}
-                        options={hotelList.map((hotel) => ({ value: hotel.id, label: hotel.name }))}
+                        // selectedOptions={[formik.values.hotel.id]}
+                        options={branchList.map((branch) => ({ value: branch.id, label: branch.name }))}
                         showSearch={true}
                         required
-                        placeholder="Vui lòng chọn khách sạn"
+                        placeholder="Vui lòng chọn chi nhánh"
                         onChange={(value) => {
 
-                            const hotel = hotelList.find((h) => h.id == value)
+                            // const hotel = hotelList.find((h) => h.id == value)
 
-                            if (hotel) {
-                                formik.setFieldValue("hotel", value);
-                            }
+                            // if (hotel) {
+                            //     formik.setFieldValue("hotel", value);
+                            // }
 
                         }}
-                    /> */}
+                    />
 
 
                     <div className='flex justify-end gap-2'>
 
+                        <button
+                            className="border px-4 py-2 rounded-lg h-9"
+                            onClick={() => onCancel && onCancel()}
+                        >
+                            Trở lại
+                        </button>
+
+
                         <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg h-9">
-                            Hoàn tất
+                            Tiếp tục
                         </button>
                     </div>
                 </div>

@@ -8,15 +8,15 @@ import { Button, Input, message, Modal, Select } from "antd"
 import { DialogContent } from "../../components/custom/dialog-content"
 import { UserManagementHeader as Header } from "./component/user-management-header"
 import { UserManagementTable } from "./component/user-management-table"
-import { CreateUser } from "./component/create-user"
 import { UserDetail } from "./component/user-detail"
 import IconUnlock from "../../components/icons/icon-unclock"
-import { Branch } from "../../model/branch/branch"
 import IconPause from "../../components/icons/icon-pause"
+import { CreateUserForm } from "./component/create-user-form"
+
 
 
 export interface UserManagmentListProps {
-    data?: User[]
+    data: User[]
     loading?: boolean
     search_key?: string
     hotel_id?: number
@@ -25,7 +25,7 @@ export interface UserManagmentListProps {
     page?: number
     limit?: number
     total_record?: number
-    onPageChange?: ((page: number) => void)
+    onPageChange?: ((limit: number,page: number) => void)
     onEdit?: ((arg0: User) => void)
     onResetPWD?: ((arg0: User) => void)
     onChangeStatus?: ((arg0: User) => void)
@@ -50,8 +50,6 @@ const UserManagment = () => {
         search_key: "",
     })
     const [statistic, setStatistic] = useState<UserStatistics>(new UserStatistics())
-
-
 
 
 
@@ -91,10 +89,14 @@ const UserManagment = () => {
 
 
     const showModalCreate = (data: User) => {
-        let component = <CreateUser data={data} onComplete={() => {
-            setDialog({ ...dialog, open: false })
-            getList(parameter)
-        }}/>;
+        let component = <CreateUserForm data={data} 
+            onComplete={() => {
+                setDialog({ ...dialog, open: false })
+                getList(parameter)
+            }}
+            onCancel={() => setDialog({ ...dialog, open: false })}
+        />;
+
         setDialog({ ...dialog, open: true, content: component, title: data.id == 0 ? "Tạo nhân viên" : "Chỉnh sửa nhân viện" })
     }
 
@@ -202,8 +204,8 @@ const UserManagment = () => {
                 page={parameter.page}
                 limit={parameter.limit}
                 total_record={parameter.total_record}
-                onPageChange={(page) => {
-                    setParameter({ ...parameter, page });
+                onPageChange={(limit:number,page:number) => {
+                    getList({ ...parameter, limit: limit,page:page });
                 }}
                 onResetPWD={(value) => showModalConfirm(2,value)} //2 = popup confirmation of reset password
                 onEdit={(value) => showModalCreate(value)}
@@ -212,7 +214,7 @@ const UserManagment = () => {
             />
 
             <Modal
-                // width={750}
+        
                 title={dialog.title}
                 centered
                 open={dialog.open}
