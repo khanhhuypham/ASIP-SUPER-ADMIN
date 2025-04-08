@@ -34,8 +34,8 @@ const BranchManagment = () => {
 
     const [parameter, setParameter] = useState<BranchListProps>({
         data: [],
+        active:STATUS.ALL,
         loading: false,
-        hotel_id:-1,
         search_key: "",
     })
 
@@ -43,19 +43,20 @@ const BranchManagment = () => {
 
 
     const getList = (p: BranchListProps) => {
-        let data: Branch[] = []
+   
         const hotel_id = p.hotel_id == -1 ? undefined : p.hotel_id
 
         branchService.getList(hotel_id, p.search_key).then((res) => {
 
             if (res.status == 200) {
-                data = res.data ?? []
+            
+                setParameter({...parameter, data: filterData(res.data ?? []), loading: false})
+                setFullData(res.data ?? [])
+
             } else {
                 toast.error(res.message)
             }
-
-            setParameter({...parameter, data: filterData(data), loading: false})
-            setFullData(data)
+         
         })
     }
 

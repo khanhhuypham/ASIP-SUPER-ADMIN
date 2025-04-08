@@ -35,17 +35,17 @@ export const CreateAccount = (
 
         }),
         onSubmit: (values) => {
-            console.log(values)
+            // we set id equal 1, in order for us when we back, i can get information that user already enter
             onComplete && onComplete(values)
         },
     });
 
-    const generateRandomCode = (): string => {
-        // Generate a random 3-digit number between 100 and 999
-        const randomNumber = Math.floor(Math.random() * 900) + 100;
-        // Combine the prefix with the random number
-        return `KH00${randomNumber}`;
-    };
+    // const generateRandomCode = (): string => {
+    //     // Generate a random 3-digit number between 100 and 999
+    //     const randomNumber = Math.floor(Math.random() * 900) + 100;
+    //     // Combine the prefix with the random number
+    //     return `KH00${randomNumber}`;
+    // };
 
 
     useEffect(() => {

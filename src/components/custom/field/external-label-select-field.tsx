@@ -93,11 +93,15 @@ export const ExternalLabelSelectField: React.FC<SelectFieldProps> = ({
                         className="disabled:bg-gray-100 h-[35px] border rounded-md outline-none "
                         placeholder={placeholder}
                         variant="borderless"
-                        value={defaultOptions}
-                
-                        onChange={(value) => {
-                            onChange && onChange(value);
+                        value={defaultOptions || (mode === 'multiple' || mode === 'tags' ? [] : undefined)}
+                        onChange={(_: SelectOption | SelectOption[], option?: SelectOptionProps | SelectOptionProps[] | undefined) => {
+                            if (option){
+                                onChange && onChange(option)
+                            }
+                           
                         }}
+                
+                     
                         options={options}
                
                     />

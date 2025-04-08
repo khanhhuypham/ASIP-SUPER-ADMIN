@@ -70,6 +70,7 @@ export const CreateBranch = ({
     const create = (data:Branch) => {
         branchService.create(data).then((res) => {
             if (res.status == 201) {
+                toast.success("Tạo thành thành công")
                 onComplete && onComplete(data);
             } else {
                 toast.error(res.message)
@@ -80,6 +81,7 @@ export const CreateBranch = ({
     const update = (data:Branch) => {
         branchService.update(data).then((res) => {
             if (res.status == 200) {
+                toast.success("Cập nhật thành công")
                 onComplete && onComplete(data);
             } else {
                 toast.error(res.message)

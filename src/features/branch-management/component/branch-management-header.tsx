@@ -10,15 +10,21 @@ import { useEffect, useState } from "react"
 import { hotelService } from "../../../service/hotel-service/hotel-service"
 import useDebounce from "../../../hooks/useDebounce"
 import { toast } from "react-toastify"
+import { APIParameterOfSelect } from "../../../components/custom/field/external-label-select-with-api"
+import SelectWithAPi from "../../../components/custom/select-with-api"
+import { SelectOption } from "../../../constants/interface"
+
+
+let timeout: ReturnType<typeof setTimeout> | null;
 
 export const Header = (
-    { data, fullData,onCreate, onSetData }:
-    {
-        data: BranchListProps,
-        fullData:Branch[]
-        onCreate?: () => void,
-        onSetData?: (data: BranchListProps) => void
-    }
+    { data, fullData, onCreate, onSetData }:
+        {
+            data: BranchListProps,
+            fullData: Branch[]
+            onCreate?: () => void,
+            onSetData?: (data: BranchListProps) => void
+        }
 ) => {
 
     const [hotelParam, setHotelParam] = useState<HotelManagmentListProps>({
@@ -36,31 +42,58 @@ export const Header = (
     ])
 
 
-    const getHotelList = (p: HotelManagmentListProps) => {
+    const getHotelList = (param: APIParameterOfSelect, setParam: (data: APIParameterOfSelect) => void) => {
 
-        hotelService.list(p).then((res) => {
-            if (res.status == 200) {
-                setHotelParam({ ...p, data: res.data.list })
-            } else {
-                toast.error(res.message)
-            }
-        })
-    }
+        if (timeout) {
+            clearTimeout(timeout);
+            timeout = null;
+        }
 
-    useEffect(() => {
-        getHotelList(hotelParam)
-    }, [])
+        const fetch = () => {
+
+            hotelService.list({ search_key: param.search_key, page: param.page, limit: param.limit }).then((res) => {
+                if (res.status == 200) {
+
+                    const newData = res.data.list.map((hotel) => ({ value: hotel.id, label: hotel.name }));
+
+                    const existingData = param.data || [];
+
+                    const mergedData = [...existingData, ...newData];
+
+                    // Add "Tất cả" only if it doesn't already exist
+                    if (!mergedData.some((item) => item.value === -1)) {
+                        mergedData.unshift({ value: -1, label: "Tất cả" });
+                    }
+
+                    setParam({
+                        ...param,
+                        data: mergedData,
+                        loading: false,
+                        total_record: res.data.total_record
+                    })
+
+                } else {
+                    toast.error(res.message)
+                }
+            })
+        }
+        timeout = setTimeout(fetch, 300);
+
+    };
+
+
+
 
     useEffect(() => {
         setTabs([
             { id: STATUS.ALL, label: "Tất cả", count: fullData?.length },
-            { id: STATUS.ACTIVE, label: "Đang hoạt động", count:fullData.filter((data) => data.active).length },
+            { id: STATUS.ACTIVE, label: "Đang hoạt động", count: fullData.filter((data) => data.active).length },
             { id: STATUS.INACTIVE, label: "Ngừng hoạt động", count: fullData.filter((data) => !data.active).length },
         ])
     }, [data])
 
     useEffect(() => {
-        onSetData && onSetData({ ...data, search_key: searchInput})
+        onSetData && onSetData({ ...data, search_key: searchInput })
     }, [useDebounce(searchInput, 300)]);
 
 
@@ -71,29 +104,31 @@ export const Header = (
 
                 <div className="space-x-2">
                     <Input
-                        placeholder="Tìm kiếm hạng phòng"
+                        placeholder="Tìm kiếm chi nhánh"
                         className="w-64"
                         prefix={<i className="fa-solid fa-magnifying-glass" />}
                         allowClear
-                     
+
                         onChange={(e) => setSearchInput(e.target.value)}
                     />
-{/* 
-                    <ExternalLabelDebounceSelect
+
+                    <SelectWithAPi
+                        fetchData={getHotelList}
                         showSearch={true}
-                        options={[{ value: "-1", label: "Tất cả" }, ...(hotelParam.data ?? []).map((b) => ({ value: b.id.toString(), label: b.name }))]}
-                        placeholder="Select users"
-                        value={data.hotel_id !== undefined ? [data.hotel_id] : undefined}
-                        onSearch={(value) => setHotelParam({ ...hotelParam, search_key: value, page: 1 })}
-                        onScrollDown={(value: boolean) => console.log(value)}
-                        onChange={(newValue) => {
+                        value={data.hotel_id}
+                        defaultValue={{ value: -1, label: "tất cả" }}
+                        placeholder="Vui lòng chọn khách sạn"
+                        onChange={(newValue: SelectOption[] | SelectOption) => {
+
                             if (!Array.isArray(newValue)) {
-                                onSetData && onSetData({ ...data, hotel_id: Number(newValue.value) })
+                                onSetData && onSetData({ ...data, hotel_id:Number(newValue.value) })
                             }
+
                         }}
                         className="w-[200px]"
-                    /> */}
+                    />
 
+          
                 </div>
 
                 <div className="flex justify-end ">

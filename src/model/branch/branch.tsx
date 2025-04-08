@@ -1,4 +1,5 @@
 import { Hotel } from "../hotel/hotel";
+import { User } from "../user/user";
 
 export class Branch {
     id: number = 0;
@@ -13,6 +14,7 @@ export class Branch {
     created_at: string = "";
     updated_at: string = "";
     hotel:Hotel = new Hotel()
+    users:User[] = []
 
 
 
