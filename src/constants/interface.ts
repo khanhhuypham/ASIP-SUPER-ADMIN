@@ -15,3 +15,9 @@ export interface IconProps {
     strokeColor?: string;
     duotone?: boolean;
 }
+
+
+export interface SelectOption {
+    value: string | number;
+    label: React.ReactNode;
+}

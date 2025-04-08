@@ -1,35 +1,31 @@
 import { useEffect, useState } from "react"
 import { PopupInterface } from "../../constants/interface"
-import { User } from "../../model/user/user"
+import { User, UserStatistics } from "../../model/user/user"
 import { userService } from "../../service/user-service/user-service"
 import { Tab, TabBar } from "../../components/custom/tab-bar"
 import { STATUS } from "../../constants/enum"
 import { Button, Input, message, Modal, Select } from "antd"
 import { DialogContent } from "../../components/custom/dialog-content"
-import { tab_filter_id } from "../../constants/tag-id"
+import { UserManagementHeader as Header } from "./component/user-management-header"
 import { UserManagementTable } from "./component/user-management-table"
-import { CreateUser } from "./component/create-user"
 import { UserDetail } from "./component/user-detail"
 import IconUnlock from "../../components/icons/icon-unclock"
-import {  ExternalLabelDebounceSelect } from "../../components/custom/field/external-label-debounce-select"
-import { OptionType } from "../../components/custom/field/debounce-select"
-import { hotelService } from "../../service/hotel-service/hotel-service"
-import { Hotel } from "../../model/hotel/hotel"
-import { branchService } from "../../service/branch-service/branch-service"
-import { Branch } from "../../model/branch/branch"
-import { HotelManagmentListProps } from "../hotel-management/hotel-management"
+import IconPause from "../../components/icons/icon-pause"
+import { CreateUserForm } from "./component/create-user-form"
+
+
 
 export interface UserManagmentListProps {
-    data?: User[]
+    data: User[]
     loading?: boolean
-    key_search?: string
+    search_key?: string
     hotel_id?: number
     branch_id?: number
-    currentTab?:STATUS
+    currentTab?: STATUS
     page?: number
     limit?: number
     total_record?: number
-    onPageChange?: ((page: number) => void)
+    onPageChange?: ((limit: number,page: number) => void)
     onEdit?: ((arg0: User) => void)
     onResetPWD?: ((arg0: User) => void)
     onChangeStatus?: ((arg0: User) => void)
@@ -41,81 +37,46 @@ export interface UserManagmentListProps {
 const UserManagment = () => {
 
     const [dialog, setDialog] = useState<PopupInterface>({ open: false, content: undefined, title: "" });
-    const [tabs, setTabs] = useState<Tab[]>([
-        { id: STATUS.ALL, label: "Tất cả", count: 0 },
-        { id: STATUS.ACTIVE, label: "Đang hoạt động", count: 0 },
-        { id: STATUS.INACTIVE, label: "Ngừng hoạt động", count: 0 },
-    ])
-
-
+ 
     const [parameter, setParameter] = useState<UserManagmentListProps>({
         data: [],
         loading: false,
-        hotel_id:-1,
-        branch_id:-1,
-        currentTab:STATUS.ALL,
+        branch_id: -1,
+        currentTab: STATUS.ALL,
         page: 1,
         limit: 10,
         total_record: 0,
-        key_search: "",
+        search_key: "",
     })
-
-    const [branchList, setBranchList] = useState<Branch[]>([])
-
-    const [hotelParam, setHotelParam] = useState<HotelManagmentListProps>({
-        data: [],
-        page: 1,
-        limit: 10,
-        key_search: "",
-    })
+    const [statistic, setStatistic] = useState<UserStatistics>(new UserStatistics())
 
 
 
+    const getList = (param: UserManagmentListProps) => {
 
-    const getList = () => {
-
-        userService.list(parameter).then((res) => {
+        userService.list(param).then((res) => {
             if (res.status == 200) {
                 setParameter({
-                    ...parameter,
-                    data: res.data.list,
-                    total_record: res.data.total_record
+                    ...param,
+                    data: res.data?.list ?? [],
+                    total_record: res.data?.total_record ?? 0
                 })
+
+                if (res.data) {
+                    setStatistic(res.data.statistic)
+                }
             } else {
                 message.error(res.message)
             }
         })
     }
 
-
-    const getHotelList = () => {
-
-        hotelService.list(hotelParam).then((res) => {
-            if (res.status == 200) {
-                setHotelParam({ ...hotelParam,data: res.data.list})
-            } else {
-                message.error(res.message)
-            }
-        })
-    }
-
-    const getBranchList = (hotelId: number) => {
-
-        branchService.getList(hotelId).then((res) => {
-            if (res.status == 200) {
-                setBranchList(res.data ?? [])
-            } else {
-                message.error(res.message)
-            }
-        })
-
-    }
 
     const changeStatus = (user: User) => {
 
         userService.changeStatus(user.id).then((res) => {
             if (res.status == 200) {
-                getList()
+                getList(parameter)
             } else {
                 message.error(res.message)
             }
@@ -124,144 +85,132 @@ const UserManagment = () => {
 
 
 
-    useEffect(() => {
-        getList()
-    }, [parameter.page,parameter.key_search,parameter.hotel_id,parameter.branch_id]);
-
-    
-
-
-    useEffect(() => {
-        getHotelList()
-    }, [hotelParam.page,hotelParam.key_search]);
-
-
     const showModalCreate = (data: User) => {
-        let component = <CreateUser data={data} />;
-        setDialog({ ...dialog, open: true, content: component, title: data.id == 0 ? "Tạo nhân viên" : "Chỉnh sửa nhân viện" })
+        let component = <CreateUserForm data={data} 
+            onComplete={() => {
+                setDialog({ ...dialog, open: false })
+                getList(parameter)
+            }}
+            onCancel={() => setDialog({ ...dialog, open: false })}
+        />;
+
+        setDialog({ ...dialog, open: true, content: component, title: data.id == 0 ? "Tạo nhân viên" : "Chỉnh sửa nhân viên" })
     }
 
 
     const showDetailModal = (data: User) => {
         let component = <UserDetail input={data} />
-        setDialog({ ...dialog, open: true, content: component, title: "Chi tiết chi nhánh" })
+        setDialog({ ...dialog, open: true, content: component, title: "Chi tiết nhân viên" })
     }
 
 
+    const showModalConfirm = (type: number, data: User) => {
 
-    const showModalConfirm = (data: User) => {
-        let content = <DialogContent
-            icon={<p className="p-3 bg-blue-100 w-fit rounded-full text-center"><IconUnlock fill={true} /></p>}
-            title="Đặt lại mật khẩu"
-            content={<p>Bạn có chắc chắn muốn đặt lại mật khẩu cho khách sạn <b>{data.name}</b> này không?</p>}
-            btnConfirm={
-                <Button color="blue" variant="solid" onClick={() => {
-                    setDialog({ ...dialog, open: false })
-                    // showResetPWDModal(data)
-                }}>
-                    Xác nhận
-                </Button>
-            }
-            btnCancel={
-                <Button variant="outlined" onClick={() => setDialog({ ...dialog, open: false })}>
-                    Trở lại
-                </Button>
-            }
-        />
+        let content = <></>
+
+        switch (type) {
+
+            case 1:// 1 = popup confirmation of active and inactive hotel
+
+                if (data.active) {
+
+
+                    content = <DialogContent
+                        icon={<p className="p-3 bg-red-100 w-fit rounded-full text-center"><IconPause /></p>}
+                        title="Khoá nhân viên?"
+                        content={<p>Bạn có chắc chắn muốn tạm khoá nhân viên <b>{data.name}</b> này không?</p>}
+                        btnConfirm={
+                            <Button color="red" variant="solid" onClick={() => {
+                                changeStatus(data)
+                                setDialog({ ...dialog, open: false })
+                            }}>
+                                Xác nhận
+                            </Button >
+                        }
+                        btnCancel={
+                            < Button variant="outlined"
+                                onClick={() => setDialog({ ...dialog, open: false })}
+                                style={{ color: "black", border: "1px solid #E5E7EB", }}
+                            >
+                                Trở lại
+                            </Button >
+                        }
+                    />
+
+                } else {
+                    content = <DialogContent
+                        icon={<p className="p-3 bg-red-100 w-fit rounded-full text-center"><IconPause /></p>}
+                        title="Mở khoá nhân viên"
+                        content={<p>Bạn có chắc chắn muốn mở khoá cho nhân viên <b>{data.name}</b> này không?</p>}
+                        btnConfirm={
+                            <Button color="blue" variant="solid" onClick={() => {
+                                changeStatus(data)
+                                setDialog({ ...dialog, open: false })
+                            }}>
+                                Xác nhận
+                            </Button>
+                        }
+                        btnCancel={
+                            <Button variant="outlined"
+                                onClick={() => setDialog({ ...dialog, open: false })}
+                                style={{ color: "#374151", border: "1px solid #E5E7EB", }}
+                            >
+                                Trở lại
+                            </Button>
+                        }
+                    />
+                }
+
+
+                break
+
+            case 2:// 2 = popup confirmation of reset password
+                content = <DialogContent
+                    icon={<p className="p-3 bg-blue-100 w-fit rounded-full text-center"><IconUnlock fill={true} /></p>}
+                    title="Đặt lại mật khẩu"
+                    content={<p>Bạn có chắc chắn muốn đặt lại mật khẩu cho nhân viên này <b>{data.name}</b> này không?</p>}
+                    btnConfirm={
+                        <Button color="blue" variant="solid" onClick={() => {
+                            setDialog({ ...dialog, open: false })
+                            // showResetPWDModal(data)
+                        }}>
+                            Xác nhận
+                        </Button>
+                    }
+                    btnCancel={
+                        <Button variant="outlined" onClick={() => setDialog({ ...dialog, open: false })}>
+                            Trở lại
+                        </Button>
+                    }
+                />
+                break
+        }
 
         setDialog({ ...dialog, open: true, content: content, title: "" })
     }
 
-    const onSearch = (key: string) => {
-        
-    };
-
-
-
-    const Header = () => {
-        return (
-            <div id={tab_filter_id} className="space-y-4">
-
-                <div className="flex justify-between">
-
-                    <div className="space-x-2">
-                        <Input
-                            placeholder="Tìm kiếm"
-                            className="w-64"
-                            prefix={<i className="fa-solid fa-magnifying-glass" />}
-                            allowClear
-                            onChange={(e) => {
-                                // const newValue = e.target.value;
-                                // getList({...parameter,key_search:newValue})
-                            }}
-                        />
-
-                        <ExternalLabelDebounceSelect
-                            showSearch={true}
-                            options={[{ value: "-1", label: "Tất cả" }, ...(hotelParam.data ?? []).map((b) => ({ value: b.id.toString(), label: b.name }))]}
-                            placeholder="Select users"
-                            value={parameter.hotel_id !== undefined ? [parameter.hotel_id] : undefined}
-                            onSearch={(value) =>  setHotelParam({ ...hotelParam,key_search: value,page:1})}
-                            onScrollDown={(value: boolean) => console.log(value)}
-                            onChange={(newValue) => {
-                            
-                                if (!Array.isArray(newValue)) {
-                                    setParameter({ ...parameter, hotel_id: Number(newValue.value) });
-                                    getBranchList(Number(newValue.value))
-                                }
-                                
-                            }}
-                            className="w-[150px]"
-                        />
-                    
-
-                        <Select
-                            value={parameter.branch_id}
-                            className="w-[150px]"
-                            showSearch
-                            placeholder="Tên chi nhánh"
-                            optionFilterProp="children"
-                            options={[{ value: -1, label: "Tất cả" }, ...branchList.map((b) => ({ value: b.id, label: b.name }))]}
-                            onChange={(value) => setParameter({ ...parameter,branch_id:value})}
-                            dropdownStyle={{ maxHeight: 400 }}
-                            notFoundContent="Không tìm thấy khách sạn"
-                        />
-
-                    </div>
-
-                    <div className="flex justify-end gap-3">
-                        <Button type="primary" onClick={() => showModalCreate(new User())}>+ Thêm nhân viên</Button>
-                    </div>
-
-                </div>
-
-                <TabBar currentTab={parameter.currentTab ?? STATUS.ALL} tabs={tabs} onChange={(value) => setParameter({ ...parameter,currentTab:value,page:1})} />
-            </div>
-        )
-    };
-
-
     return (
         <div className="panel space-y-6">
 
-            <Header />
+     
+            <Header data={parameter} statistic={statistic} onCreate={() => showModalCreate(new User())} onSetData={(data) =>  getList(data)} />
+            
             <UserManagementTable
                 data={parameter.data}
                 loading={false}
                 page={parameter.page}
                 limit={parameter.limit}
                 total_record={parameter.total_record}
-                onPageChange={(page) => {
-                    setParameter({ ...parameter, page });
+                onPageChange={(limit:number,page:number) => {
+                    getList({ ...parameter, limit: limit,page:page });
                 }}
-                onResetPWD={(value) => showModalConfirm(value)} //2 = popup confirmation of reset password
+                onResetPWD={(value) => showModalConfirm(2,value)} //2 = popup confirmation of reset password
                 onEdit={(value) => showModalCreate(value)}
-                onChangeStatus={(value) => showModalConfirm(value)}
+                onChangeStatus={(value) => showModalConfirm(1,value)}
                 onShowDetail={(value) => showDetailModal(value)}
             />
 
             <Modal
-                // width={750}
                 title={dialog.title}
                 centered
                 open={dialog.open}

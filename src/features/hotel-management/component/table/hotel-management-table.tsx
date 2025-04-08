@@ -100,7 +100,7 @@ export const HotelManagementTable = ({
         {
             title: 'Ngày tạo',
             dataIndex: 'created_at',
-            width: 150,
+            width: 160,
             sorter: (a: Hotel, b: Hotel) => {
                 if (!a.created_at || !b.created_at) return 0;
                 const dateA = new Date(a.created_at.replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$2/$1/$3"));
@@ -111,7 +111,7 @@ export const HotelManagementTable = ({
         {
             title: 'Ngày cập nhật',
             dataIndex: 'updated_at',
-            width: 150,
+            width: 160,
             sorter: (a: Hotel, b: Hotel) => {
                 if (!a.updated_at || !b.updated_at) return 0;
                 const dateA = new Date(a.updated_at.replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$2/$1/$3"));

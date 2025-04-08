@@ -1,3 +1,5 @@
+import axios from "axios";
+import { STATUS } from "../../constants/enum";
 import { HotelManagmentListProps } from "../../features/hotel-management/hotel-management";
 import { UserManagmentListProps } from "../../features/user-management/user-management";
 import { Branch } from "../../model/branch/branch";
@@ -9,38 +11,67 @@ import { BaseResponse, Pagination } from "../base-response";
 import axiosClient, { ProjectId, VERSION } from "../configURL";
 
 export const userService = {
-
-
     list: async (param: UserManagmentListProps) => {
         // 1. Get a standard Axios client instance.
         //    The request interceptor *will* run, but we will override the Authorization header.
         const apiClient = axiosClient(ProjectId); // Use the factory function
 
+        let active: boolean | undefined = undefined;
+
+        switch (param.currentTab) {
+            case STATUS.ALL:
+                active = undefined;
+                break;
+            case STATUS.ACTIVE:
+                active = true;
+                break;
+            case STATUS.INACTIVE:
+                active = false;
+                break;
+        }
+
         try {
-            const response = await apiClient.get<BaseResponse<Pagination<User[],UserStatistics>>>(`${VERSION}/user`,
-                {
-                    params: {
-                        // is_active: param.is_active,
-                        branch_id:param.branch_id,
-                        hotel_id:param.hotel_id,
-                        limit: param.limit,
-                        page: param.page,
-                    },
-                }
-            );
+            const response = await apiClient.get< BaseResponse<Pagination<User[], UserStatistics>>>(`${VERSION}/user`, {
+                params: {
+              
+                    branch_id: param.branch_id != -1 ? param.branch_id : undefined,
+                    hotel_id: param.hotel_id != -1 ? param.hotel_id : undefined,
+                    active: active,
+                    search_key: param.search_key,
+                    limit: param.limit,
+                    page: param.page,
+                },
+            });
             // 3. Return the data from the response
             return response.data;
         } catch (error) {
-            // The response interceptor will handle 401 redirects.
-            // We might want to handle other errors specifically here or re-throw.
-            console.error("SignIn failed:", error);
-            // Rethrow the error so the calling component knows about the failure
+            if (axios.isAxiosError(error) && error.response) {
+                return error.response.data as BaseResponse<undefined>;
+            }
+
             throw error;
         }
     },
 
-    
-    create: async (user: User) => {
+    getDetail: async (id: number) => {
+        // 1. Get a standard Axios client instance.
+        // The request interceptor *will* run, but we will override the Authorization header.
+        const apiClient = axiosClient(ProjectId); // Use the factory function
+
+        try {
+            const response = await apiClient.get<BaseResponse<User>>(`${VERSION}/user/${id}`);
+            // 3. Return the data from the response
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response) {
+                return error.response.data as BaseResponse<undefined>;
+            }
+
+            throw error;
+        }
+    },
+
+    create: async (user: User,login:LoginForm) => {
         // 1. Get a standard Axios client instance.
         //    The request interceptor *will* run, but we will override the Authorization header.
         const apiClient = axiosClient(ProjectId); // Use the factory function
@@ -52,15 +83,18 @@ export const userService = {
                     code: user.code,
                     email: user.email,
                     phone: user.phone,
+
+                    username:login.username,
+                    password:login.re_enter_password
                 }
             );
             // 3. Return the data from the response
             return response.data;
         } catch (error) {
-            // The response interceptor will handle 401 redirects.
-            // We might want to handle other errors specifically here or re-throw.
-            console.error("SignIn failed:", error);
-            // Rethrow the error so the calling component knows about the failure
+            if (axios.isAxiosError(error) && error.response) {
+                return error.response.data as BaseResponse<undefined>;
+            }
+
             throw error;
         }
     },
@@ -71,25 +105,24 @@ export const userService = {
         const apiClient = axiosClient(ProjectId); // Use the factory function
 
         try {
-            const response = await apiClient.patch<BaseResponse<undefined>>(`${VERSION}/user/${user.id}`,
+            const response = await apiClient.patch<BaseResponse<undefined>>( `${VERSION}/user/${user.id}`,
                 {
                     name: user.name,
                     email: user.email,
                     phone: user.phone,
-    
+                    branch_id: user.branch.id
                 }
             );
             // 3. Return the data from the response
             return response.data;
         } catch (error) {
-            // The response interceptor will handle 401 redirects.
-            // We might want to handle other errors specifically here or re-throw.
-            console.error("SignIn failed:", error);
-            // Rethrow the error so the calling component knows about the failure
+            if (axios.isAxiosError(error) && error.response) {
+                return error.response.data as BaseResponse<undefined>;
+            }
+
             throw error;
         }
     },
-
 
     changeStatus: async (id: number) => {
         // 1. Get a standard Axios client instance.
@@ -101,12 +134,11 @@ export const userService = {
             // 3. Return the data from the response
             return response.data;
         } catch (error) {
-            // The response interceptor will handle 401 redirects.
-            // We might want to handle other errors specifically here or re-throw.
-            console.error("SignIn failed:", error);
-            // Rethrow the error so the calling component knows about the failure
+            if (axios.isAxiosError(error) && error.response) {
+                return error.response.data as BaseResponse<undefined>;
+            }
+
             throw error;
         }
     },
-
 };

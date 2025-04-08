@@ -1,5 +1,5 @@
 import { Button, Input } from "antd"
-import { ExternalLabelDebounceSelect } from "../../../components/custom/field/external-label-debounce-select"
+
 import { tab_filter_id } from "../../../constants/tag-id"
 import { Tab, TabBar } from "../../../components/custom/tab-bar"
 import { STATUS } from "../../../constants/enum"
@@ -25,7 +25,7 @@ export const Header = (
         data: [],
         page: 1,
         limit: 10,
-        key_search: "",
+        search_key: "",
     })
     const [searchInput, setSearchInput] = useState("");
 
@@ -78,13 +78,13 @@ export const Header = (
                      
                         onChange={(e) => setSearchInput(e.target.value)}
                     />
-
+{/* 
                     <ExternalLabelDebounceSelect
                         showSearch={true}
                         options={[{ value: "-1", label: "Tất cả" }, ...(hotelParam.data ?? []).map((b) => ({ value: b.id.toString(), label: b.name }))]}
                         placeholder="Select users"
                         value={data.hotel_id !== undefined ? [data.hotel_id] : undefined}
-                        onSearch={(value) => setHotelParam({ ...hotelParam, key_search: value, page: 1 })}
+                        onSearch={(value) => setHotelParam({ ...hotelParam, search_key: value, page: 1 })}
                         onScrollDown={(value: boolean) => console.log(value)}
                         onChange={(newValue) => {
                             if (!Array.isArray(newValue)) {
@@ -92,7 +92,7 @@ export const Header = (
                             }
                         }}
                         className="w-[200px]"
-                    />
+                    /> */}
 
                 </div>
 

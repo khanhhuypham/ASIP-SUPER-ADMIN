@@ -10,7 +10,7 @@ import { HorizontalLineTour, Tour } from "../../../../components/custom/tour-cus
 import { CreateHotel } from "./create-hotel";
 
 import { Branch } from "../../../../model/branch/branch";
-import { CreateAccount } from "./create-account";
+import { CreateAccount } from "../../../user-management/component/create/create-account";
 import { CreateAccountSuccess } from "./create-account-success";
 import { LoginForm } from "../../../../model/user/login-form";
 import { encodePassword } from "../../../../utils/helpers";

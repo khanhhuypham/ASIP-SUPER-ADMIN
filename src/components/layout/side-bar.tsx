@@ -87,7 +87,6 @@ const Sidebar = () => {
         const storedTab = Cookies.get(COOKIE_KEYS.TAB_DEFAULT);
         if (storedTab) {
             const tab = JSON.parse(storedTab) as SideBarItem;
-            console.log("tab: ",tab)
             toggleMenu(tab);
         }
     },[])

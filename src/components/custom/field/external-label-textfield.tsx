@@ -35,27 +35,30 @@ export const ExternalLabelTextField: React.FC<ExternalLabelTextFieldProps> = ({
         <div className="focus:ring focus:ring-blue-200">
 
             <div className="flex justify-between items-start h-full w-full">
-          
-                <label htmlFor={name} className="w-[120px] shrink-0">
+
+                <label htmlFor={name} className="w-[140px] shrink-0">
                     {label}
                     {required && <span className="text-red-500"> (*)</span>}
                 </label>
 
-                <div className="w-full">
-                    <input
-                        placeholder={placeholder}
-                        id={name}
-                        name={name}
-                        value={value}
-                        type={type ?? "text"}
-                        onChange={(e) => onChange?.(e.target.value)}
-                        disabled={disabled}
-                        className="disabled:bg-gray-100 h-[35px] border rounded-md w-full px-2 outline-none"
-                    />
+                <div className={`w-full h-[35px] border rounded-md w-full px-2 ${disabled ? "bg-gray-100" : "bg-white"}`}>
+
+                    <div className="flex h-full gap-2">
+                        <input
+                            placeholder={placeholder}
+                            id={name}
+                            name={name}
+                            value={value}
+                            type={type ?? "text"}
+                            onChange={(e) => onChange?.(e.target.value)}
+                            disabled={disabled}
+                            className="outline-none w-full"
+                        />
+                        {suffix}
+                    </div>
+
                     {error ? <div className="mt-1 text-xs text-red-500">{error}</div> : null}
                 </div>
-
-
             </div>
 
         </div>

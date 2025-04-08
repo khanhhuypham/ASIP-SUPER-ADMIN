@@ -1,6 +1,7 @@
 import { Select, Space, Tag } from "antd";
 import { ErrorMessage } from "formik";
 import React, { useState, useRef, useEffect } from "react";
+import { SelectOption } from "../../../constants/interface";
 
 type SelectMode = 'multiple' | 'tags'; // Removed 'default' from SelectMode
 
@@ -15,12 +16,12 @@ interface SelectFieldProps {
     label: string;
     name: string;
     placeholder?: string;
-    selectedOptions?: string[] | number[];
+    value?: SelectOption | SelectOption[];
     options: SelectOptionProps[];
-    onChange?: (arg0: string[] | string | number[] | number) => void;
+    onChange?: (arg0: SelectOption | SelectOption[]) => void;
     required?: boolean;
     mode?: SelectMode; // Removed 'default' from the type
-    error?: string,
+    error?: string | false,
     allowClear?: boolean,
     showSearch?: boolean
 }
@@ -29,7 +30,7 @@ export const ExternalLabelSelectField: React.FC<SelectFieldProps> = ({
     label,
     name,
     placeholder,
-    selectedOptions,
+    value,
     options = [],
     onChange,
     required = false,
@@ -40,19 +41,28 @@ export const ExternalLabelSelectField: React.FC<SelectFieldProps> = ({
 }) => {
 
 
-    const [defaultOptions, setDefaultOptions] = useState<string[] | number[] | null | undefined>(undefined);
+    const [defaultOptions, setDefaultOptions] = useState<SelectOption | SelectOption[] | undefined>(undefined);
 
 
     useEffect(() => {
 
-        if (selectedOptions && selectedOptions.length > 0) {
-            console.log(selectedOptions)
-            setDefaultOptions(selectedOptions);
-        } else {
+        if (value != undefined){
+
+            if (Array.isArray(value)) {
+                // Check if the array is empty
+                // If empty, set defaultOptions to undefined
+                // If not empty, set defaultOptions to the value
+                setDefaultOptions(value.length > 0 ? value : undefined);
+            } else {
+                setDefaultOptions(value);
+            }
+
+        }else{
             setDefaultOptions(undefined);
         }
 
-    }, [selectedOptions]);
+    
+    }, [value]);
 
 
 
@@ -63,7 +73,7 @@ export const ExternalLabelSelectField: React.FC<SelectFieldProps> = ({
 
             <div className="flex items-start h-full w-full">
 
-            <label htmlFor={name} className="w-[120px] shrink-0">
+            <label htmlFor={name} className="w-[140px] shrink-0">
                     {label}
                     {required && <span className="text-red-500"> (*)</span>}
                 </label>
@@ -79,13 +89,14 @@ export const ExternalLabelSelectField: React.FC<SelectFieldProps> = ({
                         }}
                         id={name}
                         mode={mode === undefined ? undefined : mode} // Handle 'default' case
+                       
                         className="disabled:bg-gray-100 h-[35px] border rounded-md outline-none "
                         placeholder={placeholder}
                         variant="borderless"
                         value={defaultOptions}
+                
                         onChange={(value) => {
-               
-                            onChange && onChange(value == undefined ? "" : value);
+                            onChange && onChange(value);
                         }}
                         options={options}
                

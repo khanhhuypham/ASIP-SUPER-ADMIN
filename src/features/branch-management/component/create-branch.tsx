@@ -108,18 +108,18 @@ export const CreateBranch = ({
                     <ExternalLabelSelectField
                         label="Khách sạn"
                         name="hotel"
-                        selectedOptions={formik.values.hotel.id > 0 ? [formik.values.hotel.id] : undefined}
+                        // value={formik.values.hotel.id > 0 ? [formik.values.hotel.id] : undefined}
                         options={hotelList.map((hotel) => ({value:hotel.id,label:hotel.name}))}
                         showSearch={true}
                         required
                         placeholder="Vui lòng chọn khách sạn"
                         onChange={(value) => {
 
-                            const hotel = hotelList.find((h) => h.id == value)
+                            // const hotel = hotelList.find((h) => h.id == value)
 
-                            if (hotel){
-                                formik.setFieldValue("hotel", value);
-                            }
+                            // if (hotel){
+                            //     formik.setFieldValue("hotel", value);
+                            // }
                         }}
                     />
 
