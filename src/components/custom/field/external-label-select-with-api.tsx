@@ -1,14 +1,19 @@
-import { Select, Space, Tag } from "antd";
+import { Select, Space, Spin, Tag } from "antd";
 import { ErrorMessage } from "formik";
 import React, { useState, useRef, useEffect } from "react";
+import { SelectOption } from "../../../constants/interface";
 
 type SelectMode = 'multiple' | 'tags'; // Removed 'default' from SelectMode
 
-interface SelectOptionProps {
-    label: string;
-    value: string | number;
-    disabled?: boolean;
-    options?: SelectOptionProps[];
+
+
+export interface APIParameterOfSelect {
+    data: SelectOption[];
+    search_key: string;
+    page: number;
+    limit: number;
+    total_record: number;
+    loading?: boolean
 }
 
 
@@ -16,9 +21,9 @@ interface SelectWithApiProps {
     label: string;
     name: string;
     placeholder?: string;
-  
-    fetchData: (value: string, callback: (data: { value: string; label: string }[]) => void) => void;
-    onChange?: (arg0: string[] | string | number[] | number) => void;
+    value?: SelectOption[] | SelectOption;
+    fetchData: (param: APIParameterOfSelect, setParam: ((param: APIParameterOfSelect) => void)) => void;
+    onChange?: (arg0: SelectOption[] | SelectOption) => void;
     required?: boolean;
     mode?: SelectMode;
     error?: string,
@@ -31,8 +36,7 @@ export const ExternalLabelSelectWithAPI: React.FC<SelectWithApiProps> = ({
     label,
     name,
     placeholder,
-    // selectedOptions,
-
+    value,
     fetchData,
     onChange,
     required = false,
@@ -42,16 +46,54 @@ export const ExternalLabelSelectWithAPI: React.FC<SelectWithApiProps> = ({
     showSearch
 }) => {
 
-    const [data, setData] = useState<SelectOptionProps[]>([]);
-    const [value, setValue] = useState<string>();
+
+    const [selectedData, setSelectedData] = useState<SelectOption[] | SelectOption | undefined>(undefined);
+    // const [defaultData, setDefaultData] = useState<SelectOption[] | SelectOption | undefined>(undefined);
+    const [param, setParam] = useState<APIParameterOfSelect>({
+        data: [],
+        loading: false,
+        search_key: "",
+        page: 1,
+        limit: 10,
+        total_record: 0
+    });
+
 
     const handleSearch = (newValue: string) => {
-        fetchData(newValue, setData);
+        callFetchData({ ...param, search_key: newValue, page: 1, data: [] });
     };
 
-    const handleChange = (newValue: string) => {
-        setValue(newValue);
+
+    const handleChange = (value: SelectOption[] | SelectOption) => {
+        setSelectedData(value);
+        onChange && onChange(value);
     };
+
+    const handleDropdownVisibleChange = (open: boolean) => {
+        if (open && param.data.length === 0) {
+            callFetchData({ ...param, page: 1, data: [] });
+
+        }
+    };
+
+    const callFetchData = (param: APIParameterOfSelect) => {
+        setParam((prev) => ({ ...prev, loading: true }));
+        fetchData(param, setParam);
+    };
+
+     useEffect(() => {
+        if (!value) {
+            setSelectedData(undefined);
+            return;
+        }
+
+
+        setSelectedData(value);
+
+
+    }, [value]);
+
+
 
     return (
 
@@ -60,7 +102,7 @@ export const ExternalLabelSelectWithAPI: React.FC<SelectWithApiProps> = ({
 
             <div className="flex items-start h-full w-full">
 
-                <label htmlFor={name} className="w-[120px] shrink-0">
+                <label htmlFor={name} className="w-[140px] shrink-0">
                     {label}
                     {required && <span className="text-red-500"> (*)</span>}
                 </label>
@@ -71,7 +113,10 @@ export const ExternalLabelSelectWithAPI: React.FC<SelectWithApiProps> = ({
                         showSearch={showSearch}
                         allowClear={allowClear}
                         mode={mode === undefined ? undefined : mode} // Handle 'default' case
-                        value={value}
+                        value={selectedData}
+           
+                        labelInValue
+
                         placeholder={placeholder}
                         style={{
                             width: "100%",
@@ -79,19 +124,25 @@ export const ExternalLabelSelectWithAPI: React.FC<SelectWithApiProps> = ({
                         }}
                         className="disabled:bg-gray-100 h-[35px] border rounded-md outline-none "
                         variant="borderless"
-                        defaultActiveFirstOption={false}
-                        filterOption={false}
+
+                        // defaultActiveFirstOption={true}
+                        // filterOption={true}
                         onSearch={handleSearch}
                         onChange={handleChange}
                         onPopupScroll={(e: React.UIEvent<HTMLDivElement>) => {
                             const target = e.currentTarget;
 
                             if (target.scrollTop + target.clientHeight >= target.scrollHeight - 10) {
-                                console.log("Scrolled to the bottom!");
+                                if (param.data.length < param.total_record) {
+                                    callFetchData({ ...param, page: param.page + 1 });
+                                }
                             }
                         }}
-                        notFoundContent={null}
-                        options={(data || []).map((d) => ({value: d.value,label: d.label}))}
+                        onDropdownVisibleChange={handleDropdownVisibleChange} // Trigger fetch when dropdown opens
+                        notFoundContent={param.loading ? <Spin size="small" /> : "No results"}
+                        // loading={param.loading}
+                        options={param.data.map((d) => ({ value: d.value, label: d.label }))}
+
                     />
                     {error ? <div className="mt-1 text-xs text-red-500">{error}</div> : null}
                 </div>

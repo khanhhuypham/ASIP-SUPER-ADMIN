@@ -15,6 +15,8 @@ export const CreateAccount = (
 ) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showReEnterPassword, setShowReEnterPassword] = useState(false);
+
+    
     const formik = useFormik({
         initialValues: new LoginForm(),
         validationSchema: Yup.object({
@@ -33,6 +35,7 @@ export const CreateAccount = (
 
         }),
         onSubmit: (values) => {
+            console.log(values)
             onComplete && onComplete(values)
         },
     });

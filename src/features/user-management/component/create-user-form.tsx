@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { CreateAccount } from "./create/create-account";
 import { CreateUserInfo } from "./create/create-user-info";
 import { User } from "../../../model/user/user";
+import { userService } from "../../../service/user-service/user-service";
 
 
 
@@ -30,38 +31,47 @@ export const CreateUserForm = ({ data, onComplete, onCancel }: { data: User, onC
 
     useEffect(() => {
         updateTourStep(1)
-  
-        // setLoginForm(new LoginForm())
+
+        if (data.id > 0) {
+            getUser(data.id)
+        } else {
+            setUser(new User())
+        }
 
     }, [data])
 
 
 
-    const create = (data: LoginForm) => {
-       
+    const getUser = (id: number) => {
+        userService.getDetail(id).then((res) => {
+            if (res.status == 200) {
+                setUser(res.data ?? new User());
+            } else {
+                toast.error(res.message)
+            }
+        })
+    }
+    const update = (user: User) => {
+        userService.update(user).then((res) => {
+            if (res.status == 200) {
+                onComplete && onComplete()
+                toast.success("Cập nhật thành công");
+            } else {
+                toast.error(res.message);
+            }
+        })
     }
 
-        // const update = (data: User) => {
-    //     userService.update(data).then((res) => {
-    //         if (res.status == 200) {
-    //             // onComplete && onComplete()
-    //             toast.success("Cập nhật thành công");
-    //         } else {
-    //             toast.error(res.message);
-    //         }
-    //     })
-    // }
-
-    // const getHotelList = (p: HotelManagmentListProps) => {
-
-    //     hotelService.list(p).then((res) => {
-    //         if (res.status == 200) {
-    //             setHotelParam({ ...p, data: res.data.list })
-    //         } else {
-    //             toast.error(res.message)
-    //         }
-    //     })
-    // }
+    const create = (user: User,login:LoginForm) => {
+        userService.create(user,login).then((res) => {
+            if (res.status == 200) {
+                onComplete && onComplete()
+                toast.success("Tạo thành công");
+            } else {
+                toast.error(res.message);
+            }
+        })
+    }
 
 
     const updateTourStep = (newActiveId: number) => {
@@ -86,16 +96,21 @@ export const CreateUserForm = ({ data, onComplete, onCancel }: { data: User, onC
 
         switch (lastActiveTour.id) {
             case 1:
-                return <CreateUserInfo data={data}
+                return <CreateUserInfo data={user}
                     onComplete={(value: User) => {
-                        updateTourStep(lastActiveTour.id + 1)
-                        // setHotel(value)
+                       
+                        if(value.id == 0){
+                            setUser(value)
+                            updateTourStep(lastActiveTour.id + 1)
+                        }else{
+                            update(value)
+                        }
                     }}
                     onCancel={onCancel} />;
 
             case 2:
                 return <CreateAccount data={loginForm}
-                    onComplete={(value: LoginForm) => create(value)}
+                    onComplete={(value: LoginForm) => create(user,value)}
                     onRollBack={() => updateTourStep(lastActiveTour.id - 1)}
                 />;
 
@@ -107,10 +122,12 @@ export const CreateUserForm = ({ data, onComplete, onCancel }: { data: User, onC
 
     return (
         <div className="space-y-6 w-full">
-
-            <div className="w-full">
-                <HorizontalLineTour tours={tours} />
-            </div>
+            {
+                data.id == 0 &&
+                <div className="w-full">
+                    <HorizontalLineTour tours={tours} />
+                </div>
+            }
 
             {renderContent()}
         </div>

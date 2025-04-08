@@ -1,5 +1,5 @@
 import { Button, Input } from "antd"
-import { ExternalLabelDebounceSelect } from "../../../components/custom/field/external-label-debounce-select"
+
 import { tab_filter_id } from "../../../constants/tag-id"
 import { Tab, TabBar } from "../../../components/custom/tab-bar"
 import { STATUS } from "../../../constants/enum"
@@ -78,7 +78,7 @@ export const Header = (
                      
                         onChange={(e) => setSearchInput(e.target.value)}
                     />
-
+{/* 
                     <ExternalLabelDebounceSelect
                         showSearch={true}
                         options={[{ value: "-1", label: "Tất cả" }, ...(hotelParam.data ?? []).map((b) => ({ value: b.id.toString(), label: b.name }))]}
@@ -92,7 +92,7 @@ export const Header = (
                             }
                         }}
                         className="w-[200px]"
-                    />
+                    /> */}
 
                 </div>
 

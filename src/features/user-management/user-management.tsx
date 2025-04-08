@@ -41,7 +41,6 @@ const UserManagment = () => {
     const [parameter, setParameter] = useState<UserManagmentListProps>({
         data: [],
         loading: false,
-        hotel_id: -1,
         branch_id: -1,
         currentTab: STATUS.ALL,
         page: 1,
@@ -86,8 +85,6 @@ const UserManagment = () => {
 
 
 
-
-
     const showModalCreate = (data: User) => {
         let component = <CreateUserForm data={data} 
             onComplete={() => {
@@ -97,7 +94,7 @@ const UserManagment = () => {
             onCancel={() => setDialog({ ...dialog, open: false })}
         />;
 
-        setDialog({ ...dialog, open: true, content: component, title: data.id == 0 ? "Tạo nhân viên" : "Chỉnh sửa nhân viện" })
+        setDialog({ ...dialog, open: true, content: component, title: data.id == 0 ? "Tạo nhân viên" : "Chỉnh sửa nhân viên" })
     }
 
 
@@ -196,7 +193,7 @@ const UserManagment = () => {
         <div className="panel space-y-6">
 
      
-             <Header data={parameter} statistic={statistic} onCreate={() => showModalCreate(new User())} onSetData={(data) =>  getList(data)} />
+            <Header data={parameter} statistic={statistic} onCreate={() => showModalCreate(new User())} onSetData={(data) =>  getList(data)} />
             
             <UserManagementTable
                 data={parameter.data}
@@ -214,7 +211,6 @@ const UserManagment = () => {
             />
 
             <Modal
-        
                 title={dialog.title}
                 centered
                 open={dialog.open}

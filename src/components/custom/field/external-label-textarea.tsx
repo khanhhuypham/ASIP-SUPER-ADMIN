@@ -35,7 +35,7 @@ export const ExternalLabelTextArea: React.FC<ExternalLabelTextAreaProps> = ({
         <div className="focus:ring focus:ring-blue-200">
 
             <div className="flex justify-between items-start h-full w-full">
-                <label htmlFor={name} className="w-[120px] shrink-0">
+                <label htmlFor={name} className="w-[140px] shrink-0">
                     {label}
                     {required && <span className="text-red-500"> (*)</span>}
                 </label>

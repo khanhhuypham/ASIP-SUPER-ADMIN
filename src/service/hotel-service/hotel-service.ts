@@ -18,7 +18,7 @@ export const hotelService = {
                 {
                     params: {
                         is_active: param.is_active,
-                        key_search: param.search_key,
+                        search_key: param.search_key,
                         from_date: param.from_date,
                         to_date: param.to_date,
                         limit: param.limit,

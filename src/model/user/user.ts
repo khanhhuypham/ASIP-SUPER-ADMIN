@@ -1,3 +1,5 @@
+import { Branch } from "../branch/branch";
+
 export class User {
     id: number = 0;
     code: string = "";
@@ -9,6 +11,7 @@ export class User {
     active: boolean = true;
     created_at: string = "";
     updated_at: string = "";
+    branch:Branch = new Branch();
     
     constructor(data?: Partial<User>) {
         Object.assign(this, data);

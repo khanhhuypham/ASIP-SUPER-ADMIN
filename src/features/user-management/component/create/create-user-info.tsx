@@ -10,8 +10,10 @@ import { Branch } from "../../../../model/branch/branch";
 import { HotelManagmentListProps } from "../../../hotel-management/hotel-management";
 import { hotelService } from "../../../../service/hotel-service/hotel-service";
 import { branchService } from "../../../../service/branch-service/branch-service";
-import { SelectWithApi } from "../../../../components/custom/field/select-with-api";
-import ExternalLabelSelectWithAPI from "../../../../components/custom/field/external-label-select-with-api";
+import ExternalLabelSelectWithAPI, { APIParameterOfSelect } from "../../../../components/custom/field/external-label-select-with-api";
+import { emailRegex, phoneRegExp } from "../../../../constants/regex";
+import { SelectOption } from "../../../../constants/interface";
+import { Hotel } from "../../../../model/hotel/hotel";
 
 
 
@@ -22,40 +24,37 @@ export const CreateUserInfo = (
     { data: User, onComplete?: ((agr0: User) => void), onCancel?: (() => void) }
 ) => {
     const [randomNumber, setRandomNumber] = useState<number>(0)
-
+    const [hotel, setHotel] = useState<{value:number,label:string} | undefined>(undefined)
     const [branchList, setBranchList] = useState<Branch[]>([])
 
-    const [hotelParam, setHotelParam] = useState<HotelManagmentListProps>({
-        data: [],
-        page: 1,
-        limit: 10,
-        search_key: "",
-    })
+
 
     const formik = useFormik({
         initialValues: new User(),
         validationSchema: Yup.object({
 
-            // username: Yup.string()
-            //     .min(2, "Độ dài tối thiểu 2 ký tự")
-            //     .max(50, "Độ dài tối đa 50 ký tự")
-            //     .required("Tên đăng nhập không được bỏ trống"),
-            // password: Yup.string()
-            //     .min(6, "Mật khẩu phải có ít nhất 6 ký tự")
-            //     .required("Mật khẩu không được để trống"),
 
-            // re_enter_password: Yup.string()
-            //     .oneOf([Yup.ref("password"), null], "Mật khẩu nhập lại không khớp")
-            //     .required("Vui lòng nhập lại mật khẩu"),
+            name: Yup.string()
+                .min(2, "Độ dài tối thiểu 2 ký tự")
+                .max(50, "Độ dài tối đa 50 ký tự")
+                .required("Tên khách hàng không được bỏ trống"),
+
+            phone: Yup.string()
+                .matches(phoneRegExp, "số điện thoại không hợp lệ")
+                .required("Số điện thoại không được để trống"),
+
+            email: Yup.string().matches(emailRegex, "Email không hợp lệ").nullable(),
+
+
+            branch: Yup.object().shape({
+                id: Yup.number().required("Chi nhánh không được bỏ trống"),
+            }).required("Chi nhánh không được bỏ trống"),
+
 
         }),
         onSubmit: (values) => {
-
-            onComplete && onComplete({ ...values })
-
-            // data.id == 0
-            //     ? onComplete && onComplete({ ...values })
-            //     : update(values)
+      
+            onComplete && onComplete(values)
 
         },
     });
@@ -63,18 +62,27 @@ export const CreateUserInfo = (
 
 
 
-    const getHotelList = (value: string, callback: (data: { value: string; label: string }[]) => void) => {
-    
+    const getHotelList = (param: APIParameterOfSelect, setPram: (data: APIParameterOfSelect) => void) => {
+
         if (timeout) {
             clearTimeout(timeout);
             timeout = null;
         }
-    
+
         const fetch = () => {
-    
-            hotelService.list({ search_key:value,page: 1, limit: 10 }).then((res) => {
+
+            hotelService.list({ search_key: param.search_key, page: param.page, limit: param.limit }).then((res) => {
                 if (res.status == 200) {
-                    callback((res.data.list ?? []).map((hotel) => ({ value: hotel.id.toString(), label: hotel.name })));
+
+                    let newData = res.data.list.map((hotel) => ({ value: hotel.id, label: hotel.name }))
+
+                    setPram({
+                        ...param,
+                        data: [...param.data, ...newData],
+                        loading: false,
+                        total_record: res.data.total_record
+                    })
+
                 } else {
                     toast.error(res.message)
                 }
@@ -114,19 +122,17 @@ export const CreateUserInfo = (
 
         if (data.id == 0) {
             formik.resetForm()
+            setHotel(undefined)
             setRandomNumber(Math.floor(Math.random() * 900) + 100)
         } else {
+            setHotel({value:data.branch.hotel.id,label:data.branch.hotel.name})
             formik.setValues(data)
         }
-
-        // getHotelList(hotelParam)
-        getBranchList(1)
 
     }, [data])
 
     useEffect(() => {
         if (formik.values.name == "") return
-
         formik.setFieldValue("code", generateRandomCode(formik.values.name))
 
     }, [formik.values.name])
@@ -160,6 +166,7 @@ export const CreateUserInfo = (
                         onChange={(value) => {
                             formik.setFieldValue("code", value)
                         }}
+                        disabled={true}
                     />
 
 
@@ -190,37 +197,40 @@ export const CreateUserInfo = (
                         label="Khách sạn"
                         name="hotel"
                         showSearch={true}
-                        required
                         placeholder="Vui lòng chọn khách sạn"
-                        onChange={(value) => {
+                        value={hotel}
+    
+                        onChange={(value: SelectOption[] | SelectOption) => {
 
-                    
+                            if (!Array.isArray(value)) {
+                                formik.setFieldValue("branch", new Branch());
+                                getBranchList(Number(value.value));
+                            }
+
                         }}
+                        required
                     />
 
 
                     <ExternalLabelSelectField
                         label="Chi nhánh"
-                        name="hotel"
-                        // selectedOptions={[formik.values.hotel.id]}
-                        options={branchList.map((branch) => ({ value: branch.id, label: branch.name }))}
+                        name="branch"
                         showSearch={true}
-                        required
                         placeholder="Vui lòng chọn chi nhánh"
-                        onChange={(value) => {
+                        options={branchList.map((branch) => ({ value: branch.id, label: branch.name }))}
+                        value={formik.values.branch.id > 0 ? { value: formik.values.branch.id, label: formik.values.branch.name } : undefined}
+                        error={formik.touched.branch && formik.errors.branch?.id}
+                        onChange={(value:SelectOption[] | SelectOption) => {
 
-                            // const hotel = hotelList.find((h) => h.id == value)
-
-                            // if (hotel) {
-                            //     formik.setFieldValue("hotel", value);
-                            // }
-
+                            if (!Array.isArray(value)) {
+                                const branch = branchList.find((b) => b.id === value.value);
+                                if (branch) {
+                                    formik.setFieldValue("branch", branch);
+                                }
+                            }
                         }}
+                        required
                     />
-
-
-                    {/* <SelectWithApi placeholder="input search text" style={{ width: 200 }} /> */}
-
 
                     <div className='flex justify-end gap-2'>
 

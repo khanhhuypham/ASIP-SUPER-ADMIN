@@ -7,12 +7,8 @@ export const UserDetail = ({ input }: { input: User }) => {
     const [data, setData] = useState<User>(new User())
 
 
-
-
-
     useEffect(() => {
-        // getDetail(input.id)
-        // getBranchList(input.id)
+
         setData(input)
     }, [input])
 

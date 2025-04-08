@@ -10,27 +10,23 @@ import { Branch } from "../../../model/branch/branch";
 import { UserManagmentListProps } from "../user-management";
 import { Button, Input, Select } from "antd";
 import { Tab, TabBar } from "../../../components/custom/tab-bar";
-import { ExternalLabelDebounceSelect } from "../../../components/custom/field/external-label-debounce-select";
 import { UserStatistics } from "../../../model/user/user";
+import { APIParameterOfSelect } from "../../../components/custom/field/external-label-select-with-api";
+import { SelectOption } from "../../../constants/interface";
+import SelectWithAPi from "../../../components/custom/select-with-api";
 
+let timeout: ReturnType<typeof setTimeout> | null;
 export const UserManagementHeader = (
     { data, statistic, onCreate, onSetData }:
-        {
-            data: UserManagmentListProps,
-            statistic: UserStatistics
-            onCreate?: () => void,
-            onSetData?: (data: UserManagmentListProps) => void
-        }
+    {
+        data: UserManagmentListProps,
+        statistic: UserStatistics
+        onCreate?: () => void,
+        onSetData?: (data: UserManagmentListProps) => void
+    }
 ) => {
 
     const [branchList, setBranchList] = useState<Branch[]>([])
-
-     const [hotelParam, setHotelParam] = useState<HotelManagmentListProps>({
-        data: [],
-        page: 1,
-        limit: 10,
-        search_key: "",
-    })
 
     const [searchInput, setSearchInput] = useState("");
 
@@ -41,16 +37,45 @@ export const UserManagementHeader = (
     ])
 
 
-    const getHotelList = (p:HotelManagmentListProps) => {
+    const getHotelList = (param: APIParameterOfSelect, setParam: (data: APIParameterOfSelect) => void) => {
 
-        hotelService.list(p).then((res) => {
-            if (res.status == 200) {
-                setHotelParam({ ...p, data: res.data.list })
-            } else {
-                toast.error(res.message)
-            }
-        })
-    }
+        if (timeout) {
+            clearTimeout(timeout);
+            timeout = null;
+        }
+
+        const fetch = () => {
+
+            hotelService.list({ search_key: param.search_key, page: param.page, limit: param.limit }).then((res) => {
+                if (res.status == 200) {
+
+                    const newData = res.data.list.map((hotel) => ({ value: hotel.id,label: hotel.name}));
+
+                    const existingData = param.data || [];
+
+                    const mergedData = [...existingData, ...newData];
+
+                    // Add "Tất cả" only if it doesn't already exist
+                    if (!mergedData.some((item) => item.value === -1)) {
+                        mergedData.unshift({ value: -1, label: "Tất cả" });
+                    }
+
+                    setParam({
+                        ...param,
+                        data: mergedData,
+                        loading: false,
+                        total_record: res.data.total_record
+                    })
+
+                } else {
+                    toast.error(res.message)
+                }
+            })
+        }
+        timeout = setTimeout(fetch, 300);
+
+    };
+
 
     const getBranchList = (hotelId: number) => {
 
@@ -64,13 +89,13 @@ export const UserManagementHeader = (
 
     }
 
-    useEffect(() => {
-        getHotelList(hotelParam)
-    }, [])
+    // useEffect(() => {
+    //     getHotelList(hotelParam)
+    // }, [])
 
     useEffect(() => {
         setTabs([
-            { id: STATUS.ALL, label: "Tất cả", count:statistic.total },
+            { id: STATUS.ALL, label: "Tất cả", count: statistic.total },
             { id: STATUS.ACTIVE, label: "Đang hoạt động", count: statistic.total_active },
             { id: STATUS.INACTIVE, label: "Ngừng hoạt động", count: statistic.total_inactive },
         ])
@@ -97,18 +122,19 @@ export const UserManagementHeader = (
                         }}
                     />
 
-                    <ExternalLabelDebounceSelect
-                        showSearch={true}
-                        options={[{ value: "-1", label: "Tất cả" }, ...(hotelParam.data ?? []).map((b) => ({ value: b.id.toString(), label: b.name }))]}
-                        placeholder="Select users"
-                        value={data.hotel_id !== undefined ? [data.hotel_id] : undefined}
-                        onSearch={(value) => setHotelParam({ ...hotelParam, search_key: value, page: 1 })}
-                        onScrollDown={(value: boolean) => console.log(value)}
-                        onChange={(newValue) => {
 
-                            if (!Array.isArray(newValue)) {
-                                onSetData && onSetData({ ...data, hotel_id: Number(newValue.value) });
-                                getBranchList(Number(newValue.value))
+                    <SelectWithAPi
+                        fetchData={getHotelList}
+                        showSearch={true}
+                        value={data.hotel_id}
+                        defaultValue={{value:-1,label:"tất cả"}}
+                        placeholder="Vui lòng chọn khách sạn"
+                        onChange={(value: SelectOption[] | SelectOption) => {
+
+                            if (!Array.isArray(value)) {
+                                console.log("value: ", value)
+                                onSetData && onSetData({ ...data, hotel_id: Number(value.value), branch_id: -1 });
+                                getBranchList(Number(value.value))
                             }
 
                         }}

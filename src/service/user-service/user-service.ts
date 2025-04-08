@@ -53,19 +53,39 @@ export const userService = {
         }
     },
 
-    create: async (user: User) => {
+    getDetail: async (id: number) => {
+        // 1. Get a standard Axios client instance.
+        // The request interceptor *will* run, but we will override the Authorization header.
+        const apiClient = axiosClient(ProjectId); // Use the factory function
+
+        try {
+            const response = await apiClient.get<BaseResponse<User>>(`${VERSION}/user/${id}`);
+            // 3. Return the data from the response
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response) {
+                return error.response.data as BaseResponse<undefined>;
+            }
+
+            throw error;
+        }
+    },
+
+    create: async (user: User,login:LoginForm) => {
         // 1. Get a standard Axios client instance.
         //    The request interceptor *will* run, but we will override the Authorization header.
         const apiClient = axiosClient(ProjectId); // Use the factory function
 
         try {
-            const response = await apiClient.post<BaseResponse<undefined>>(
-                `${VERSION}/user`,
+            const response = await apiClient.post<BaseResponse<undefined>>(`${VERSION}/user`,
                 {
                     name: user.name,
                     code: user.code,
                     email: user.email,
                     phone: user.phone,
+
+                    username:login.username,
+                    password:login.re_enter_password
                 }
             );
             // 3. Return the data from the response
@@ -90,6 +110,7 @@ export const userService = {
                     name: user.name,
                     email: user.email,
                     phone: user.phone,
+                    branch_id: user.branch.id
                 }
             );
             // 3. Return the data from the response
