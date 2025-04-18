@@ -24,7 +24,7 @@ export const CreateUserForm = ({ data, onComplete, onCancel }: { data: User, onC
         { id: 2, label: "Tạo tài khoản", active: false, completed: false }
     ])
 
-
+    const [saveUserForm,setSaveUserForm] = useState<boolean>(false)
     const [user, setUser] = useState<User>(new User())
 
     const [loginForm, setLoginForm] = useState<LoginForm>(new LoginForm())
@@ -37,7 +37,7 @@ export const CreateUserForm = ({ data, onComplete, onCancel }: { data: User, onC
         } else {
             setUser(new User())
         }
-
+        
     }, [data])
 
 
@@ -64,11 +64,12 @@ export const CreateUserForm = ({ data, onComplete, onCancel }: { data: User, onC
 
     const create = (user: User,login:LoginForm) => {
         userService.create(user,login).then((res) => {
-            if (res.status == 200) {
+            if (res.status == 201) {
                 onComplete && onComplete()
                 toast.success("Tạo thành công");
             } else {
                 toast.error(res.message);
+                setLoginForm(login)
             }
         })
     }
@@ -96,10 +97,12 @@ export const CreateUserForm = ({ data, onComplete, onCancel }: { data: User, onC
 
         switch (lastActiveTour.id) {
             case 1:
-                return <CreateUserInfo data={user}
+                return <CreateUserInfo data={user} saveUserForm={saveUserForm}
+
                     onComplete={(value: User) => {
                        
                         if(value.id == 0){
+                            setSaveUserForm(true)
                             setUser(value)
                             updateTourStep(lastActiveTour.id + 1)
                         }else{

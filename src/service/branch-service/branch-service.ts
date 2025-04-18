@@ -3,6 +3,7 @@ import axios from "axios";
 import { Branch } from "../../model/branch/branch";
 import { BaseResponse } from "../base-response";
 import axiosClient, { ProjectId, VERSION } from "../configURL";
+import { User } from "../../model/user/user";
 
 
 
@@ -17,6 +18,20 @@ export const branchService = {
                     search_key:search_key
                 },
             });
+            return response?.data;
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response) {
+                return error.response.data as BaseResponse<undefined>;
+            }
+
+            throw error;
+        }
+    },
+
+    getAllEmployeesByBranchId: async (id:number) => {
+        const apiClient = axiosClient(ProjectId);
+        try {
+            const response = await apiClient.get<BaseResponse<User[]>>(`${VERSION}/branch/get-all-employees/${id}`);
             return response?.data;
         } catch (error) {
             if (axios.isAxiosError(error) && error.response) {

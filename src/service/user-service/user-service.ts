@@ -83,6 +83,7 @@ export const userService = {
                     code: user.code,
                     email: user.email,
                     phone: user.phone,
+                    branch_id: user.branch.id,
 
                     username:login.username,
                     password:login.re_enter_password

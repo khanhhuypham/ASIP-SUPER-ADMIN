@@ -267,7 +267,7 @@ const HotelManagment = () => {
 
                 <div className="flex justify-between">
                     <Input
-                        placeholder="Tìm kiếm hạng phòng"
+                        placeholder="Tìm kiếm khách sạn"
                         className="w-64"
                         value={searchInput} // Use value instead of defaultValue
                         prefix={<SearchOutlined />}

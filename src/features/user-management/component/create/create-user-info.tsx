@@ -7,21 +7,20 @@ import { ExternalLabelTextField } from "../../../../components/custom/field/exte
 import ExternalLabelSelectField from "../../../../components/custom/field/external-label-select-field";
 import { toast } from "react-toastify";
 import { Branch } from "../../../../model/branch/branch";
-import { HotelManagmentListProps } from "../../../hotel-management/hotel-management";
 import { hotelService } from "../../../../service/hotel-service/hotel-service";
 import { branchService } from "../../../../service/branch-service/branch-service";
 import ExternalLabelSelectWithAPI, { APIParameterOfSelect } from "../../../../components/custom/field/external-label-select-with-api";
 import { emailRegex, phoneRegExp } from "../../../../constants/regex";
 import { SelectOption } from "../../../../constants/interface";
-import { Hotel } from "../../../../model/hotel/hotel";
+
 
 
 
 let timeout: ReturnType<typeof setTimeout> | null;
 
 export const CreateUserInfo = (
-    { data, onComplete, onCancel }:
-    { data: User, onComplete?: ((agr0: User) => void), onCancel?: (() => void) }
+    { data,saveUserForm, onComplete, onCancel }:
+    { data: User,saveUserForm:boolean ,onComplete?: ((agr0: User) => void), onCancel?: (() => void) }
 ) => {
     const [randomNumber, setRandomNumber] = useState<number>(0)
     const [hotel, setHotel] = useState<{value:number,label:string} | undefined>(undefined)
@@ -32,7 +31,6 @@ export const CreateUserInfo = (
     const formik = useFormik({
         initialValues: new User(),
         validationSchema: Yup.object({
-
 
             name: Yup.string()
                 .min(2, "Độ dài tối thiểu 2 ký tự")
@@ -53,7 +51,7 @@ export const CreateUserInfo = (
 
         }),
         onSubmit: (values) => {
-      
+         
             onComplete && onComplete(values)
 
         },
@@ -119,17 +117,35 @@ export const CreateUserInfo = (
 
 
     useEffect(() => {
+    
 
         if (data.id == 0) {
-            formik.resetForm()
-            setHotel(undefined)
-            setRandomNumber(Math.floor(Math.random() * 900) + 100)
+            if (saveUserForm) {
+            
+                getBranchList(data.branch.hotel.id)
+                setHotel({value:data.branch.hotel.id,label:data.branch.hotel.name})
+                formik.setValues(data)
+            }else{
+                formik.resetForm()
+                setHotel(undefined)
+                setRandomNumber(Math.floor(Math.random() * 900) + 100)
+            }
+           
         } else {
+         
             setHotel({value:data.branch.hotel.id,label:data.branch.hotel.name})
             formik.setValues(data)
         }
 
+        
+
     }, [data])
+
+    // useEffect(() => {
+    //     console.log(data)
+    // },[])
+
+
 
     useEffect(() => {
         if (formik.values.name == "") return
@@ -149,7 +165,7 @@ export const CreateUserInfo = (
                     <ExternalLabelTextField
                         label="Tên nhân viên"
                         name="name"
-                        placeholder="Nhập thông tin"
+                        placeholder="Vui lòng nhập tên"
                         value={formik.values.name}
                         error={formik.touched.name && formik.errors.name}
                         onChange={(value) => {
@@ -173,6 +189,7 @@ export const CreateUserInfo = (
                     <ExternalLabelTextField
                         label="Số điện thoại"
                         name="phone"
+                        placeholder="Vui lòng nhập số điện thoại"
                         value={formik.values.phone}
                         error={formik.touched.phone && formik.errors.phone}
                         onChange={(value) => {
@@ -183,6 +200,7 @@ export const CreateUserInfo = (
                     <ExternalLabelTextField
                         label="Email"
                         name="email"
+                        placeholder="Vui lòng nhập email"
                         value={formik.values.email}
                         error={formik.touched.email && formik.errors.email}
                         onChange={(value) => {
@@ -200,15 +218,16 @@ export const CreateUserInfo = (
                         placeholder="Vui lòng chọn khách sạn"
                         value={hotel}
     
-                        onChange={(value: SelectOption[] | SelectOption) => {
+                        onChange={(hotel: SelectOption[] | SelectOption) => {
 
-                            if (!Array.isArray(value)) {
+                            if (!Array.isArray(hotel)) {
+                               
                                 formik.setFieldValue("branch", new Branch());
-                                getBranchList(Number(value.value));
+                                getBranchList(Number(hotel.value));
                             }
 
                         }}
-                        required
+                        
                     />
 
 
@@ -221,10 +240,11 @@ export const CreateUserInfo = (
                         value={formik.values.branch.id > 0 ? { value: formik.values.branch.id, label: formik.values.branch.name } : undefined}
                         error={formik.touched.branch && formik.errors.branch?.id}
                         onChange={(value:SelectOption[] | SelectOption) => {
-
+                          
                             if (!Array.isArray(value)) {
                                 const branch = branchList.find((b) => b.id === value.value);
                                 if (branch) {
+                                    console.log("branch: ", branch)
                                     formik.setFieldValue("branch", branch);
                                 }
                             }
